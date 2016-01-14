@@ -11,7 +11,12 @@ public class Server
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
 	
-	public void openServerSockets(int serverPort)
+	/**
+	 * Opens the server's sockets and establish a wait to establish a remote
+	 * connection with a client
+	 * @param serverPort
+	 */
+	private void openServerSockets(int serverPort)
 	{
 		try
 		{
@@ -26,8 +31,13 @@ public class Server
 		}
 	}
 	
-	public void receiveMessage()
+	/**
+	 * Wait for a message to come through the channel, then returns it.
+	 * @return message that came through the channel
+	 */
+	private String receiveMessage()
 	{
+		String msgInput = null;
 		if(serverSocket != null && clientSocket != null)
 		{
 			try
@@ -35,7 +45,7 @@ public class Server
 				InputStream bIStream = clientSocket.getInputStream();
 				
 				byte[] byteBuffer = new byte[8000];
-				String msgInput = "";
+				msgInput = "";
 				bIStream.read(byteBuffer);
 				{
 					for (byte b: byteBuffer)
@@ -57,9 +67,13 @@ public class Server
 		{
 			System.out.println("Could not receive message: server's sockets are null");
 		}
+		return msgInput;
 	}
 	
-	public void closeServerSockets()
+	/**
+	 * Closes the server's sockets
+	 */
+	public synchronized void closeServerSockets()
 	{
 		if(serverSocket != null && clientSocket != null)
 		{
@@ -77,7 +91,35 @@ public class Server
 		else
 		{
 			System.out.println("Could not close message: server's sockets are null");
-		}
-		
+		}	
 	}
+	
+	/**
+	 * Creates and starts a thread that opens the server's sockets and wait
+	 * for a message to come trough the channel
+	 * @param serverPort
+	 */
+	public void startOpenSocketThread(int serverPort)
+	{
+		Thread thread =  new Thread(() ->
+		{
+			openServerSockets(serverPort);
+			receiveMessage();
+		});
+		thread.start();
+	}
+	
+	/**
+	 * Creates and start a thread that wait for a message to come through the 
+	 *  opened channel. 
+	 * @param serverPort
+	 */
+	public void startReceiveMessageThread(int serverPort)
+	{
+		Thread thread =  new Thread(() ->
+		{
+			receiveMessage();
+		});
+		thread.start();
+	}	
 }
