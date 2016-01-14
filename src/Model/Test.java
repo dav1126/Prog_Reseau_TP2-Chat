@@ -7,13 +7,20 @@ public class Test
 	{
 		
 //		Server server = new Server();
-//		server.openServerSockets(55555);
+//		server.startOpenSocketThread(55555);
 //		
 //		System.out.println("test");
-//		
-//		server.receiveMessage();
-//		System.out.println("test2");
-//		server.receiveMessage();
+//		while(!server.connectionEstablished)
+//		{
+//			try {
+//				Thread.sleep(10);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		server.startReceiveMessageThread();
+//		server.startReceiveMessageThread();
 		
 		
 		Client client = new Client();

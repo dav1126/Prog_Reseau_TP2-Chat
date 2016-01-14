@@ -6,10 +6,15 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+
 public class Server
 {
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
+	boolean connectionEstablished = false;
 	
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -22,7 +27,7 @@ public class Server
 		{
 			serverSocket = new ServerSocket(serverPort);
 			clientSocket = serverSocket.accept();
-	
+			connectionEstablished = true;
 		} 
 		catch (IOException e)
 		{
@@ -104,7 +109,6 @@ public class Server
 		Thread thread =  new Thread(() ->
 		{
 			openServerSockets(serverPort);
-			receiveMessage();
 		});
 		thread.start();
 	}
@@ -114,12 +118,12 @@ public class Server
 	 *  opened channel. 
 	 * @param serverPort
 	 */
-	public void startReceiveMessageThread(int serverPort)
+	public void startReceiveMessageThread()
 	{
 		Thread thread =  new Thread(() ->
 		{
 			receiveMessage();
 		});
 		thread.start();
-	}	
+	}
 }
