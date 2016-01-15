@@ -40,8 +40,6 @@ public class Client
 	
 	public void sendMessage(String message)
 	{
-		if (clientSocket != null)
-		{
 			try
 			{
 				OutputStream output = clientSocket.getOutputStream();
@@ -52,11 +50,6 @@ public class Client
 				System.out.println("Message could not be sent");
 				e.printStackTrace();
 			}
-		}
-		else
-		{
-			System.out.println("Could not send message: clientSocket is null");
-		}
 	}
 	
 	public void closeClientSocket()
@@ -79,14 +72,34 @@ public class Client
 		}
 	}
 	
-	public void sendFile(String filePath)
+	public void sendFile(File fileToSend)
 	{
+		//First, send a message that tells the server that the next transmission
+		//is gonna be a file
+		try
+		{
+			OutputStream output = clientSocket.getOutputStream();
+			byte[] fileTransmissionCode = new String(
+					"THE NEXT TRANSMISSION IS GONNA BE A FILE BE READY YOU "
+					+ "STUPID SERVER, HERES THE SUPER COOL FILE TRANSMISSION "
+					+ "SECRET CODE: "
+					+ "NHRTYFHAPWLM*?DYXN!848145489WJD23243212WDWDAAWD)"
+					+ "(* ALPHA").getBytes();
+			output.write(fileTransmissionCode);	
+		} 
+		catch (IOException e)
+		{	
+			System.out.println("Message could not be sent");
+			e.printStackTrace();
+		}
+		
+		
+		
 		FileInputStream fis = null;
 	    BufferedInputStream bis = null;
 	    OutputStream os = null;
 	    try
 	    {
-			File fileToSend = new File(filePath);
 			byte[] fileByteArray = new byte[(int)fileToSend.length()];
 			fis = new FileInputStream(fileToSend);
 			bis = new BufferedInputStream(fis);

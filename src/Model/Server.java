@@ -49,7 +49,7 @@ public class Server
 			{
 				InputStream bIStream = clientSocket.getInputStream();
 				
-				byte[] byteBuffer = new byte[8000];
+				byte[] byteBuffer = new byte[Integer.MAX_VALUE];
 				msgInput = "";
 				bIStream.read(byteBuffer);
 				{
