@@ -15,6 +15,7 @@ public class Server
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
 	boolean connectionEstablished = false;
+	private static final int MAX_TRANSMISSION_BYTE_SIZE = 1000000;
 	
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -49,17 +50,17 @@ public class Server
 			{
 				InputStream bIStream = clientSocket.getInputStream();
 				
-				byte[] byteBuffer = new byte[Integer.MAX_VALUE];
+				byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+				int count;
 				msgInput = "";
-				bIStream.read(byteBuffer);
+				while ((count = bIStream.read(byteBuffer)) > 0)
 				{
-					for (byte b: byteBuffer)
+					for (int i = 0; i <= count ; i++)
 					{
-						msgInput += (char)b;
-						System.out.print((char)b);
+						msgInput += (char)byteBuffer[i];
+						System.out.println((char)byteBuffer[i]);
 					}
 				}
-				
 				System.out.println("Received Message" + msgInput);
 			}
 			catch (IOException e)

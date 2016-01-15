@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 public class Client
 {
 	Socket clientSocket;
+	private static final int MAX_TRANSMISSION_BYTE_SIZE = 1000000;
 	
 	public void openClientSocket(String remoteIpAddress, int remotePort)
 	{
