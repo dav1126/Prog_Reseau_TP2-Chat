@@ -74,18 +74,38 @@ public class Client
 		}
 	}
 
-	public void sendFile(File fileToSend)
+	/**
+	 * Calls the appropriate functions to send a file to the server
+	 * @param fileToSend 
+	 */
+	public void startSendFile(File fileToSend)
 	{
-		// First, send a message that tells the server that the next
-		// transmission is gonna be a file
 		try
 		{
+			sendFileTransmissionAlert();
+			sendFileName(fileToSend);
+			sendFile(fileToSend);	
+		} 
+		catch (IOException e)
+		{
+			System.out.println("File could not be sent");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Send a message to the server that tells that the next transmission is
+	 * gonna be a file, the wait for a confirmation form the server
+	 */
+	private void sendFileTransmissionAlert() throws IOException
+	{
+		// Send the message
 			OutputStream output = clientSocket.getOutputStream();
 			byte[] fileTransmissionCode = new String(
 					FILE_TRANSMISSION_ALERT_MSG).getBytes();
 			output.write(fileTransmissionCode);
 			
-			//Wait for a confirmation before to send the file
+			//Wait for a receipt confirmation from the server
 			InputStream bIStream = clientSocket.getInputStream();
 			
 			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
@@ -93,46 +113,66 @@ public class Client
 			String msgInput = "";
 			
 			
-			for (int i = 0; i <= count ; i++)
+			for (int i = 0; i < count ; i++)
 				{
 					msgInput += (char)byteBuffer[i];
 				}
 			
 			System.out.println("Received Message from Server: " + msgInput);
-			
-		} catch (IOException e)
-		{
-			System.out.println("Message could not be sent");
-			e.printStackTrace();
-		}
-
-		FileInputStream fis = null;
-		BufferedInputStream bis = null;
-		OutputStream os = null;
-		try
-		{
-			byte[] fileByteArray = new byte[(int) fileToSend.length()];
-			if (fileByteArray.length <= MAX_TRANSMISSION_BYTE_SIZE)
+	}
+	
+	/**
+	 * Send the name of the file to the server, then wait for a confirmation
+	 * from the server
+	 */
+	private void sendFileName(File fileToSend) throws IOException
+	{
+		//Send the name of the file
+		OutputStream output = clientSocket.getOutputStream();
+		byte[] nameOfFile = new String(fileToSend.getName()).getBytes();
+		output.write(nameOfFile);
+	
+		//Wait for a receipt confirmation from the server
+		InputStream bIStream = clientSocket.getInputStream();
+		
+		byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+		int countName = bIStream.read(byteBuffer);
+		String msgInput = "";
+		
+		
+		for (int i = 0; i < countName ; i++)
 			{
-				fis = new FileInputStream(fileToSend);
-				bis = new BufferedInputStream(fis);
-				bis.read(fileByteArray, 0, fileByteArray.length);
-				os = clientSocket.getOutputStream();
-				os.write(fileByteArray, 0, fileByteArray.length);
-				os.flush();
+				msgInput += (char)byteBuffer[i];
 			}
-			else
+		
+		System.out.println("Received Message from Server: " 
+							+ msgInput);
+	}
+	
+	/**
+	 * Send the file to the server
+	 */
+	private void sendFile(File fileToSend) throws IOException
+	{
+		//Send the name of the file
+		OutputStream output = clientSocket.getOutputStream();
+		byte[] nameOfFile = new String(fileToSend.getName()).getBytes();
+		output.write(nameOfFile);
+	
+		//Wait for a receipt confirmation from the server
+		InputStream bIStream = clientSocket.getInputStream();
+		
+		byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+		int countName = bIStream.read(byteBuffer);
+		String msgInput = "";
+		
+		
+		for (int i = 0; i < countName ; i++)
 			{
-				//MANAGE FILE TOO LARGE************************************************
-				System.out.println("File size too big");
-				
+				msgInput += (char)byteBuffer[i];
 			}
-		} catch (Exception e)
-		{
-			System.out
-					.println("File could not be sent: File not found or IOException");
-			e.printStackTrace();
-		}
-
+		
+		System.out.println("Received Message from Server: " 
+							+ msgInput);
 	}
 }

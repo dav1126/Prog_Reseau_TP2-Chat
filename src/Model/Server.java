@@ -64,7 +64,7 @@ public class Server
 				msgInput = "";
 				
 				
-				for (int i = 0; i <= count ; i++)
+				for (int i = 0; i < count ; i++)
 					{
 						msgInput += (char)byteBuffer[i];
 						//System.out.println((char)byteBuffer[i]);
@@ -79,12 +79,12 @@ public class Server
 					//Confirm the reception of the file transmission alert t
 					//the client
 					OutputStream bOStream = clientSocket.getOutputStream();
-					String msg = "File transmission alert received. Waiting for file...";
+					String msg = "File transmission alert received. Waiting for file name...";
 					bOStream.write(msg.getBytes());
 					bOStream.flush();
 					
 					//Receive the file
-					receiveFile();
+					startReceiveFile();
 				}
 			}
 			catch (IOException e)
@@ -100,39 +100,94 @@ public class Server
 		return msgInput;
 	}
 	
-	private void receiveFile()
+	private void startReceiveFile()
 	{
-		String fileInput = null;
-		if(serverSocket != null && clientSocket != null)
+		String fileName = receiveFileName();
+		receiveFile(fileName);	
+	}
+	
+	/**
+	 * Receive a file name from the client, the send a confirmation to the client
+	 * @return the name of the file
+	 */
+	public String receiveFileName()
+	{
+		String fileName = null;
+		
+		try
 		{
-			try
+			InputStream bIStream = clientSocket.getInputStream();
+			
+			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+			int count = bIStream.read(byteBuffer);
+			fileName = "";
+			
+			
+			for (int i = 0; i < count ; i++)
 			{
-				InputStream bIStream = clientSocket.getInputStream();
-				File file = new File(PATH_TO_FILE_DIRECTORY + "tempFileName");
-				System.out.println("default file name: " + file.getName());
-				FileOutputStream fos = new FileOutputStream(file);
-				
-				
-				byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
-				int count = bIStream.read(byteBuffer);
-				
-				for (int i = 0; i <= count ; i++)
-					{
-						fos.write(byteBuffer[i]);
-					}
-				
-				System.out.println("File received: " + file.getName());
-				
+				fileName += (char)byteBuffer[i];
 			}
-			catch (IOException e)
-			{
-				System.out.println("Could not receive file.");
+			
+			//Confirm the reception of the file name to the client
+			OutputStream bOStream = clientSocket.getOutputStream();
+			String msg = "File name received. Waiting for file...";
+			bOStream.write(msg.getBytes());
+			bOStream.flush();
+		}
+			
+		catch (IOException e)
+		{
+			System.out.println("Could not receive file.");
+			e.printStackTrace();
+		}
+		
+		return fileName;
+	}
+	
+	/**
+	 * Receive a file from the client, the send a confirmation to the client
+	 */
+	public void receiveFile(String fileName)
+	{
+		FileOutputStream fos = null;
+		try
+		{
+			//Get the file
+			InputStream bIStream = clientSocket.getInputStream();
+			File file = new File(PATH_TO_FILE_DIRECTORY, fileName);
+			file.createNewFile();
+			file.mkdirs();
+			fos = new FileOutputStream(file);
+			
+			
+			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+			int count = bIStream.read(byteBuffer);
+			
+			for (int i = 0; i < count ; i++)
+				{
+					fos.write(byteBuffer[i]);
+				}
+			
+			System.out.println("File received: " + file.getName());
+			
+			//Confirm the reception of the file to the client
+			OutputStream bOStream = clientSocket.getOutputStream();
+			String msg = "File transmission successful!";
+			bOStream.write(msg.getBytes());
+			bOStream.flush();
+		}
+		catch (IOException e)
+		{
+			System.out.println("Could not receive file.");
+			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				fos.close();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-		else
-		{
-			System.out.println("Could not receive file: server's sockets are null");
 		}
 	}
 	
