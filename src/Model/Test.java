@@ -29,8 +29,9 @@ public class Test
 		Client client = new Client();
 		client.openClientSocket("172.18.10.24", 55555);
 		
-		client.sendMessage("Coucou me voilà!");
-	
+		//client.sendMessage("Coucou me voilà!");
+		
+		client.sendFile(file);
 		
 		try
 		{
@@ -41,7 +42,7 @@ public class Test
 			e.printStackTrace();
 		}
 	
-		client.sendMessage("Me revoila");
+		//client.sendMessage("Me revoila");
 	}
 
 }

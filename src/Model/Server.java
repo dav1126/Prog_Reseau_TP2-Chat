@@ -76,6 +76,14 @@ public class Server
 				//If the received message is the file transmission alert message
 				if (msgInput.compareTo(FILE_TRANSMISSION_ALERT_MSG) == 0)
 				{
+					//Confirm the reception of the file transmission alert t
+					//the client
+					OutputStream bOStream = clientSocket.getOutputStream();
+					String msg = "File transmission alert received. Waiting for file...";
+					bOStream.write(msg.getBytes());
+					bOStream.flush();
+					
+					//Receive the file
 					receiveFile();
 				}
 			}

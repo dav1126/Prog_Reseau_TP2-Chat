@@ -84,6 +84,22 @@ public class Client
 			byte[] fileTransmissionCode = new String(
 					FILE_TRANSMISSION_ALERT_MSG).getBytes();
 			output.write(fileTransmissionCode);
+			
+			//Wait for a confirmation before to send the file
+			InputStream bIStream = clientSocket.getInputStream();
+			
+			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+			int count = bIStream.read(byteBuffer);
+			String msgInput = "";
+			
+			
+			for (int i = 0; i <= count ; i++)
+				{
+					msgInput += (char)byteBuffer[i];
+				}
+			
+			System.out.println("Received Message from Server: " + msgInput);
+			
 		} catch (IOException e)
 		{
 			System.out.println("Message could not be sent");
