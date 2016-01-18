@@ -7,7 +7,7 @@ public class Test
 
 	public static void main(String[] args)
 	{
-		File file = new File("C:\\eula.1028.txt");
+		File file = new File("C:\\mshtml.dll");
 		
 //		Server server = new Server();
 //		server.startOpenSocketThread(55555);

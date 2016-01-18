@@ -80,16 +80,23 @@ public class Client
 	 */
 	public void startSendFile(File fileToSend)
 	{
-		try
+		if (fileToSend.length() <= MAX_TRANSMISSION_BYTE_SIZE)
 		{
-			sendFileTransmissionAlert();
-			sendFileName(fileToSend);
-			sendFile(fileToSend);	
-		} 
-		catch (IOException e)
+			try
+			{
+				sendFileTransmissionAlert();
+				sendFileName(fileToSend);
+				sendFile(fileToSend);	
+			} 
+			catch (IOException e)
+			{
+				System.out.println("File could not be sent");
+				e.printStackTrace();
+			}
+		}
+		else
 		{
-			System.out.println("File could not be sent");
-			e.printStackTrace();
+			System.out.println("File is too big. 10 Mo maximum.");
 		}
 	}
 	
