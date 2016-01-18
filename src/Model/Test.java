@@ -1,13 +1,19 @@
 package Model;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Enumeration;
 
 public class Test
 {
 
 	public static void main(String[] args)
 	{
-		File file = new File("C:\\mshtml.dll");
+		//File file = new File("C:\\mshtml.dll");
 		
 //		Server server = new Server();
 //		server.startOpenSocketThread(55555);
@@ -26,23 +32,22 @@ public class Test
 //		server.startReceiveMessageThread();
 		
 		
-		Client client = new Client();
-		client.openClientSocket("172.18.10.22", 55555);
+//		Client client = new Client();
+//		client.openClientSocket("172.18.10.22", 55555);
 		
 		//client.sendMessage("Coucou me voilà!");
 		
-		client.startSendFile(file);
-		
-		try
-		{
-			Thread.sleep(5000);
-		} catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		client.startSendFile(file);
+//		
+//		try
+//		{
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e)
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	
 		//client.sendMessage("Me revoila");
 	}
-
 }

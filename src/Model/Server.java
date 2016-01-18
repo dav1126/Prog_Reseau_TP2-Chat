@@ -5,8 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,6 +17,7 @@ import javafx.beans.value.ObservableBooleanValue;
 
 public class Server
 {
+	DatagramSocket UDPSocket;
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
 	boolean connectionEstablished = false;
@@ -21,6 +25,7 @@ public class Server
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
+	private static final int UDP_SOCKET_NUMBER = 5556;
 	
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -188,6 +193,55 @@ public class Server
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	/**
+	 * Opens a UDP socket that is used to wait for broadcast messages.
+	 */
+	public void openUDPSocket()
+	{	
+		try
+		{
+			UDPSocket = new DatagramSocket(UDP_SOCKET_NUMBER);
+			UDPSocket.setBroadcast(true);
+		} 
+		catch (SocketException e)
+		{
+			System.out.println("UDP socket " + UDP_SOCKET_NUMBER +" could not be openend." );
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Receive broadcast messages from remote clients.
+	 */
+	public void receiveBroadcastRequest()
+	{
+		//Buffer to receive the broadcast request
+		byte[] buffer = new byte[1];
+		DatagramPacket remoteHostPacket = new DatagramPacket(buffer, buffer.length);
+		try
+		{
+			UDPSocket.receive(remoteHostPacket);
+//			System.out.println( "BroadCast request from: " + 
+//					new String(
+//					remoteHostIp.getData(), 0, remoteHostIp.getLength()));
+			String remoteIpAddress = UDPSocket.getInetAddress().getHostAddress();
+			System.out.println( "BroadCast request from: " + remoteIpAddress);
+			//Send a response to the remote client
+			byte[] bufferResponse = new byte[1];
+			DatagramPacket responsePacket = new DatagramPacket
+					(bufferResponse, bufferResponse.length, 
+							remoteHostPacket.getAddress(), 
+							remoteHostPacket.getPort());
+			UDPSocket.send(responsePacket);
+			System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+		} 
+		catch (IOException e)
+		{
+			System.out.println("UDP Packet reception failed");
+			e.printStackTrace();
 		}
 	}
 	

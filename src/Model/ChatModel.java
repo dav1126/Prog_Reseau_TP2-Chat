@@ -1,18 +1,24 @@
 package Model;
 
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class ChatModel
 {
+	private static ChatModel instance;
+	
 	private ObservableList<String> statusMessagesList = null;
 	
 	private ObservableList<String> chatMessagesList = null;
 	
-	public ChatModel()
+	private ObservableList<String> availableForChatIpAddressList = null;
+	
+	private ChatModel()
 	{
 		statusMessagesList = FXCollections.observableArrayList();
 		chatMessagesList =FXCollections.observableArrayList();
+		availableForChatIpAddressList = FXCollections.observableArrayList();
 	}
 	
 	public ObservableList<String> getChatMessagesList()
@@ -25,6 +31,18 @@ public class ChatModel
 		return statusMessagesList;
 	}
 	
-	//Les methodes .add des ObservableList<String> mettent la qui les contient listView à jour automatiquement
-	//Ces observables listes du modele doivent etre palcées directement dans les listview de la vue
+	public ObservableList<String> getAvailableForChatIpAddressList()
+	{
+		return availableForChatIpAddressList;
+	}
+	
+	public static ChatModel getInstance(){
+		
+		if(instance == null){
+			
+			instance = new ChatModel();
+		}
+		
+		return instance;
+	}
 }
