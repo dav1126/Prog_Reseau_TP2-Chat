@@ -27,11 +27,11 @@ public class Test
 		
 		
 		Client client = new Client();
-		client.openClientSocket("172.18.10.24", 55555);
+		client.openClientSocket("172.18.10.22", 55555);
 		
 		//client.sendMessage("Coucou me voilà!");
 		
-		client.sendFile(file);
+		client.startSendFile(file);
 		
 		try
 		{

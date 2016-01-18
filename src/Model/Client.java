@@ -148,16 +148,22 @@ public class Client
 		System.out.println("Received Message from Server: " 
 							+ msgInput);
 	}
-	
+	//L'ERREUR EST ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII!!!!!!!!!!!!!!JE RENVOIE LE filetosent.getname()!!!!!
 	/**
 	 * Send the file to the server
 	 */
 	private void sendFile(File fileToSend) throws IOException
 	{
-		//Send the name of the file
+		//Send the file
 		OutputStream output = clientSocket.getOutputStream();
-		byte[] nameOfFile = new String(fileToSend.getName()).getBytes();
-		output.write(nameOfFile);
+		InputStream input = new FileInputStream(fileToSend);
+		byte[] fileByteArray = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+		
+		int count;
+		while((count = input.read(fileByteArray)) > 0)
+		{
+			output.write(fileByteArray, 0, count);
+		}
 	
 		//Wait for a receipt confirmation from the server
 		InputStream bIStream = clientSocket.getInputStream();
@@ -174,5 +180,6 @@ public class Client
 		
 		System.out.println("Received Message from Server: " 
 							+ msgInput);
+		input.close();
 	}
 }
