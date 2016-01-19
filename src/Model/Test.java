@@ -32,8 +32,10 @@ public class Test
 //		server.startReceiveMessageThread();
 		
 		
-//		Client client = new Client();
+		Client client = new Client();
 //		client.openClientSocket("172.18.10.22", 55555);
+		client.openUDPSocket();
+		client.getRemoteIpAvailableForChat("172.18.10.22");
 		
 		//client.sendMessage("Coucou me voilà!");
 		
@@ -49,5 +51,7 @@ public class Test
 //		}
 	
 		//client.sendMessage("Me revoila");
+		
+		//http://michieldemey.be/blog/network-discovery-using-udp-broadcast/
 	}
 }

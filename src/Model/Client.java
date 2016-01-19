@@ -24,64 +24,87 @@ public class Client
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
 	private static final int UDP_SOCKET_NUMBER = 5556;
+	private static final int SERVER_SOCKET_NUMBER = 5555;
 	
 	/**
 	 * Objet servant a locker la liste observable de Ip atteignable
 	 */
 		Object lock = new Object();
 
-	public void openClientSocket(String remoteIpAddress, int remotePort)
+	public void openClientSocket(String remoteIpAddress)
 	{
-		InetAddress adress = null;
-		try
+		Thread thread =  new Thread(() ->
 		{
-			adress = InetAddress.getByName(remoteIpAddress);
-		} catch (UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
-
-		clientSocket = null;
-		try
-		{
-			clientSocket = new Socket(adress, remotePort);
-		} catch (IOException e)
-		{
-			System.out.println("Cannot open client socket");
-			e.printStackTrace();
-		}
+			InetAddress adress = null;
+			try
+			{
+				adress = InetAddress.getByName(remoteIpAddress);
+			} catch (UnknownHostException e)
+			{
+				e.printStackTrace();
+			}
+	
+			clientSocket = null;
+			try
+			{
+				clientSocket = new Socket(adress, SERVER_SOCKET_NUMBER);
+			} catch (IOException e)
+			{
+				System.out.println("Cannot open client socket");
+				e.printStackTrace();
+			}
+		});
+		thread.start();
 	}
 
 	public void sendMessage(String message)
 	{
-		try
+		Thread thread =  new Thread(() ->
 		{
-			OutputStream output = clientSocket.getOutputStream();
-			output.write(message.getBytes());
-		} catch (IOException e)
-		{
-			System.out.println("Message could not be sent");
-			e.printStackTrace();
-		}
+			//Wait for the clientSocket to be openend 
+			//(this is done in another thread)
+			while (clientSocket == null)
+			{
+				try
+				{
+					Thread.sleep(10);
+				} catch (Exception e)
+				{
+					System.out.println("Send message thread sleep error");
+					e.printStackTrace();
+				}
+			}
+			try
+			{
+				OutputStream output = clientSocket.getOutputStream();
+				output.write(message.getBytes());
+			} catch (IOException e)
+			{
+				System.out.println("Message could not be sent");
+				e.printStackTrace();
+			}
+		});
+		thread.start();
 	}
 
-	public void closeClientSocket()
+	public void closeSockets()
 	{
 		if (clientSocket != null)
 		{
 			try
 			{
 				clientSocket.close();
+				UDPsocket.close();
 			} catch (IOException e)
 			{
-				System.out.println("Client socket could not be closed");
+				System.out.println("Client sockets could not be closed");
 				clientSocket = null;
 				e.printStackTrace();
 			}
 		} else
 		{
 			System.out
-					.println("Could not close client socket: clientSocket is null");
+					.println("Could not close client sockets");
 		}
 	}
 
@@ -93,17 +116,34 @@ public class Client
 	{
 		if (fileToSend.length() <= MAX_TRANSMISSION_BYTE_SIZE)
 		{
-			try
+			Thread thread =  new Thread(() ->
 			{
-				sendFileTransmissionAlert();
-				sendFileName(fileToSend);
-				sendFile(fileToSend);	
-			} 
-			catch (IOException e)
-			{
-				System.out.println("File could not be sent");
-				e.printStackTrace();
-			}
+				//Wait for the clientSocket to be openend 
+				//(this is done in another thread)
+				while (clientSocket == null)
+				{
+					try
+					{
+						Thread.sleep(10);
+					} catch (Exception e)
+					{
+						System.out.println("Send file thread sleep error");
+						e.printStackTrace();
+					}
+				}
+				try
+				{
+					sendFileTransmissionAlert();
+					sendFileName(fileToSend);
+					sendFile(fileToSend);	
+				} 
+				catch (IOException e)
+				{
+					System.out.println("File could not be sent");
+					e.printStackTrace();
+				}
+			});
+			thread.start();
 		}
 		else
 		{
@@ -200,6 +240,23 @@ public class Client
 		input.close();
 	}
 	
+	public void openUDPSocket()
+	{
+		Thread thread =  new Thread(() ->
+		{
+			try
+			{
+				UDPsocket = new DatagramSocket();
+			} 
+			catch (SocketException e)
+			{
+				System.out.println("Client could not open UDP socket");
+				e.printStackTrace();
+			}
+		});
+		thread.start();
+	}
+	
 		
 	/**
 	 * Broadcast a message for a specific port on the subnetwork of a given ip
@@ -210,6 +267,17 @@ public class Client
 	{	
 		Thread thread =  new Thread(() ->
 		{
+			while (UDPsocket == null)
+			{
+				try
+				{
+					Thread.sleep(10);
+				} catch (Exception e)
+				{
+					System.out.println("Get remote ips thread sleep error");
+					e.printStackTrace();
+				}
+			}
 			//Get the subnet (/24 subnets only)
 			String[] ipSplit = ipAddress.split("\\.");
 			String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
@@ -257,7 +325,10 @@ public class Client
 			String remoteMachineIpAddress = responsePacket.getAddress().getHostAddress();
 			
 			//Add the remote machine ip address to the available for chat list
-			ChatModel.getInstance().getAvailableForChatIpAddressList().add(remoteMachineIpAddress);
+			synchronized (lock)
+			{
+				ChatModel.getInstance().getAvailableForChatIpAddressList().add(remoteMachineIpAddress);
+			}
 			System.out.println("Chat available with: " + remoteMachineIpAddress);
 		});
 		thread.start();

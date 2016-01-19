@@ -26,17 +26,17 @@ public class Server
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
 	private static final int UDP_SOCKET_NUMBER = 5556;
+	private static final int SERVER_SOCKET_NUMBER = 5555;
 	
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
 	 * connection with a client
-	 * @param serverPort
 	 */
-	private void openServerSockets(int serverPort)
+	private void openServerSockets()
 	{
 		try
 		{
-			serverSocket = new ServerSocket(serverPort);
+			serverSocket = new ServerSocket(SERVER_SOCKET_NUMBER);
 			clientSocket = serverSocket.accept();
 			connectionEstablished = true;
 		} 
@@ -107,8 +107,25 @@ public class Server
 	
 	private void startReceiveFile()
 	{
-		String fileName = receiveFileName();
-		receiveFile(fileName);	
+		Thread thread =  new Thread(() ->
+		{
+			//Wait for the sockets to be openend
+			while (serverSocket == null || clientSocket == null)
+			{
+				try
+				{
+					Thread.sleep(10);
+				} 
+				catch (Exception e)
+				{
+					System.out.println("Server receive file thread sleep error");
+					e.printStackTrace();
+				}
+			}
+				String fileName = receiveFileName();
+				receiveFile(fileName);
+		});
+		thread.start();
 	}
 	
 	/**
@@ -201,16 +218,20 @@ public class Server
 	 */
 	public void openUDPSocket()
 	{	
-		try
+		Thread thread =  new Thread(() ->
 		{
-			UDPSocket = new DatagramSocket(UDP_SOCKET_NUMBER);
-			UDPSocket.setBroadcast(true);
-		} 
-		catch (SocketException e)
-		{
-			System.out.println("UDP socket " + UDP_SOCKET_NUMBER +" could not be openend." );
-			e.printStackTrace();
-		}
+			try
+			{
+				UDPSocket = new DatagramSocket(UDP_SOCKET_NUMBER);
+				UDPSocket.setBroadcast(true);
+			} 
+			catch (SocketException e)
+			{
+				System.out.println("UDP socket " + UDP_SOCKET_NUMBER +" could not be openend." );
+				e.printStackTrace();
+			}
+		});
+		thread.start();
 	}
 	
 	/**
@@ -218,31 +239,46 @@ public class Server
 	 */
 	public void receiveBroadcastRequest()
 	{
-		//Buffer to receive the broadcast request
-		byte[] buffer = new byte[1];
-		DatagramPacket remoteHostPacket = new DatagramPacket(buffer, buffer.length);
-		try
+		
+		Thread thread =  new Thread(() ->
 		{
-			UDPSocket.receive(remoteHostPacket);
-//			System.out.println( "BroadCast request from: " + 
-//					new String(
-//					remoteHostIp.getData(), 0, remoteHostIp.getLength()));
-			String remoteIpAddress = UDPSocket.getInetAddress().getHostAddress();
-			System.out.println( "BroadCast request from: " + remoteIpAddress);
-			//Send a response to the remote client
-			byte[] bufferResponse = new byte[1];
-			DatagramPacket responsePacket = new DatagramPacket
-					(bufferResponse, bufferResponse.length, 
-							remoteHostPacket.getAddress(), 
-							remoteHostPacket.getPort());
-			UDPSocket.send(responsePacket);
-			System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
-		} 
-		catch (IOException e)
-		{
-			System.out.println("UDP Packet reception failed");
-			e.printStackTrace();
-		}
+			//Wait for the UDPSocket to be opened
+			while (UDPSocket == null)
+			{
+				try
+				{
+					Thread.sleep(10);
+				} catch (Exception e)
+				{
+					System.out.println("Receive broadcast thread sleep error");
+					e.printStackTrace();
+				}
+			}
+			//Buffer to receive the broadcast request
+			byte[] buffer = new byte[1];
+			DatagramPacket remoteHostPacket = new DatagramPacket(buffer, buffer.length);
+			try
+			{
+				UDPSocket.receive(remoteHostPacket);
+				String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
+				System.out.println( "BroadCast request from: " + remoteIpAddress);
+				//Send a response to the remote client
+				byte[] bufferResponse = new byte[1];
+				DatagramPacket responsePacket = new DatagramPacket
+						(bufferResponse, bufferResponse.length, 
+								remoteHostPacket.getAddress(), 
+								remoteHostPacket.getPort());
+				UDPSocket.send(responsePacket);
+				System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+			} 
+			catch (IOException e)
+			{
+				System.out.println("UDP Packet reception failed");
+				e.printStackTrace();
+			}
+		});
+		
+		thread.start();
 	}
 	
 	/**
@@ -256,6 +292,7 @@ public class Server
 			{
 				clientSocket.close();
 				serverSocket.close();
+				UDPSocket.close();
 			}
 			catch (IOException e)
 			{
@@ -272,13 +309,12 @@ public class Server
 	/**
 	 * Creates and starts a thread that opens the server's sockets and wait
 	 * for a message to come trough the channel
-	 * @param serverPort
 	 */
-	public void startOpenSocketThread(int serverPort)
+	public void startOpenSocketThread()
 	{
 		Thread thread =  new Thread(() ->
 		{
-			openServerSockets(serverPort);
+			openServerSockets();
 		});
 		thread.start();
 	}
@@ -286,7 +322,6 @@ public class Server
 	/**
 	 * Creates and start a thread that wait for a message to come through the 
 	 *  opened channel. 
-	 * @param serverPort
 	 */
 	public void startReceiveMessageThread()
 	{
