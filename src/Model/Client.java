@@ -266,7 +266,7 @@ public class Client
 	 *  @param ipAddress given ip address
 	 */
 	public void getRemoteUserAvailableForChat()
-	{	
+	{	//J'Ai utilisé le lAN2 est cest ce qui est renvoyé par localhost...je dois utiliser le lan1******************************* 
 		Thread thread =  new Thread(() ->
 		{
 			//Keep checking for new 
@@ -285,7 +285,7 @@ public class Client
 					}
 				}
 				
-				//Get the subnet (works for /24 subnets only)
+				//Get the subnet (works for /16 subnets only)
 				String localAddress = null;
 				try
 				{
@@ -298,10 +298,11 @@ public class Client
 				}
 				String[] ipSplit = localAddress.split("\\.");
 				String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
-						ipSplit[1] + "." + ipSplit[2] + ".";
+						ipSplit[1] + ".";
 				
 				//Create the broadcast address
-				String broadcastAddress = subnetworkPartOfIpAddress + "255";
+				String broadcastAddress = subnetworkPartOfIpAddress + "255.255";
+				System.out.println("BROADCAST:" +broadcastAddress);
 				InetAddress brodcastInetAddress = null;
 				try
 				{
@@ -338,7 +339,7 @@ public class Client
 				{
 					e.printStackTrace();
 				}
-				
+				System.out.println("test");
 				//Get the username sent by the server
 				
 				String username = new String(responsePacket.getData()).trim();
@@ -350,7 +351,7 @@ public class Client
 				//Add the remote machine ip address to the available for chat list
 				synchronized (lock)
 				{
-					ChatModel.getInstance().getAvailableForChatIpAddressList().add(remoteMachineIp);
+					ChatModel.getInstance().getAvailableForChatIpAddressList().add(username);
 					ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
 				}
 				System.out.println("Chat available with: " + username);

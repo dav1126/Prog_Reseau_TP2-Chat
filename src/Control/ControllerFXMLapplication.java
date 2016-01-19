@@ -97,6 +97,9 @@ public class ControllerFXMLapplication implements Initializable{
 	    	server.openUDPSocket();
 	    	server.receiveBroadcastRequests(textFieldNomUtilisateur.getText());
 	    	
+	    	//Open the client socket used to send UDP broadcast to remote servers
+	    	client.openUDPSocket();
+	    	
 	    	//Set the LAN name
 	    	reseauLocalLabel.setText(client.findDnsSuffix());
 	    	
@@ -110,8 +113,7 @@ public class ControllerFXMLapplication implements Initializable{
     	else
     	{
     		System.exit(0);
-    	}
-    	
+    	} 	
     }
     
     /**
