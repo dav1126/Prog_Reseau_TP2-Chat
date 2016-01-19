@@ -13,6 +13,8 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import javafx.application.Platform;
 
@@ -263,74 +265,168 @@ public class Client
 	 * address
 	 *  @param ipAddress given ip address
 	 */
-	public void getRemoteIpAvailableForChat(String ipAddress)
+	public void getRemoteUserAvailableForChat()
 	{	
 		Thread thread =  new Thread(() ->
 		{
-			while (UDPsocket == null)
+			//Keep checking for new 
+			while (true)
 			{
+				//Wait for the UDPsocket to be openend (done by another thread)
+				while (UDPsocket == null)
+				{
+					try
+					{
+						Thread.sleep(10);
+					} catch (Exception e)
+					{
+						System.out.println("Get remote ips thread sleep error");
+						e.printStackTrace();
+					}
+				}
+				
+				//Get the subnet (works for /24 subnets only)
+				String localAddress = null;
 				try
 				{
-					Thread.sleep(10);
-				} catch (Exception e)
+					localAddress = InetAddress.getLocalHost().getHostAddress();
+					System.out.println("bla" +localAddress);
+				} catch (Exception e1)
 				{
-					System.out.println("Get remote ips thread sleep error");
+					
+					e1.printStackTrace();
+				}
+				String[] ipSplit = localAddress.split("\\.");
+				String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
+						ipSplit[1] + "." + ipSplit[2] + ".";
+				
+				//Create the broadcast address
+				String broadcastAddress = subnetworkPartOfIpAddress + "255";
+				InetAddress brodcastInetAddress = null;
+				try
+				{
+					brodcastInetAddress = InetAddress.getByName(broadcastAddress);
+				} 
+				catch (UnknownHostException e)
+				{
+					System.out.println("Client could not create broadcast address");
+					e.printStackTrace();
+				}
+				byte[] buffer = new byte[1];
+				DatagramPacket brodcastPacket = new DatagramPacket
+						(buffer, buffer.length, brodcastInetAddress, UDP_SOCKET_NUMBER);
+				try
+				{
+					UDPsocket.send(brodcastPacket);
+				} 
+				catch (IOException e)
+				{
+					System.out.println("Client could not send broadcast packet");
+					e.printStackTrace();
+				}
+				System.out.println("Brodcast message sent from client.");
+				
+				//Wait for a response from a server, the server responds with
+				//the username specified by the user
+				byte[] bufferResponse = new byte[1024];
+				DatagramPacket responsePacket = new DatagramPacket(bufferResponse, bufferResponse.length);
+				try
+				{
+					UDPsocket.receive(responsePacket);
+				} 
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+				
+				//Get the username sent by the server
+				
+				String username = new String(responsePacket.getData()).trim();
+				
+				//Get the ip address of the responding machine
+				String remoteMachineIp = responsePacket.getAddress().getHostName();
+		
+				
+				//Add the remote machine ip address to the available for chat list
+				synchronized (lock)
+				{
+					ChatModel.getInstance().getAvailableForChatIpAddressList().add(remoteMachineIp);
+					ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+				}
+				System.out.println("Chat available with: " + username);
+				
+				//Put the thread to sleep for 5 seconds
+				try
+				{
+					Thread.sleep(5000);
+				} 
+				catch (Exception e)
+				{
 					e.printStackTrace();
 				}
 			}
-			//Get the subnet (/24 subnets only)
-			String[] ipSplit = ipAddress.split("\\.");
-			String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
-					ipSplit[1] + "." + ipSplit[2] + ".";
-			
-			//Create the broadcast address
-			String broadcastAddress = subnetworkPartOfIpAddress + "255";
-			InetAddress brodcastInetAddress = null;
-			try
-			{
-				brodcastInetAddress = InetAddress.getByName(broadcastAddress);
-			} 
-			catch (UnknownHostException e)
-			{
-				System.out.println("Client could not create broadcast address");
-				e.printStackTrace();
-			}
-			byte[] buffer = new byte[1];
-			DatagramPacket brodcastPacket = new DatagramPacket
-					(buffer, buffer.length, brodcastInetAddress, UDP_SOCKET_NUMBER);
-			try
-			{
-				UDPsocket.send(brodcastPacket);
-			} 
-			catch (IOException e)
-			{
-				System.out.println("Client could not send broadcast packet");
-				e.printStackTrace();
-			}
-			System.out.println("Brodcast message sent from client.");
-			
-			//Wait for a response from a server
-			byte[] bufferResponse = new byte[1];
-			DatagramPacket responsePacket = new DatagramPacket(bufferResponse, bufferResponse.length);
-			try
-			{
-				UDPsocket.receive(responsePacket);
-			} 
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-			
-			//Get the ip address of the responding machine
-			String remoteMachineIpAddress = responsePacket.getAddress().getHostAddress();
-			
-			//Add the remote machine ip address to the available for chat list
-			synchronized (lock)
-			{
-				ChatModel.getInstance().getAvailableForChatIpAddressList().add(remoteMachineIpAddress);
-			}
-			System.out.println("Chat available with: " + remoteMachineIpAddress);
 		});
 		thread.start();
 	}
+	
+	/**Find and returns the DNS suffix of the. 
+	 * Plagiat alert!! This method is taken from internet!
+	 * Source: http://stackoverflow.com/questions/6134790/how-do-i-access-the-connection-specific-dns-suffix-for-each-networkinterface-in 
+	 * @return the dns suffix
+	 */
+	public String findDnsSuffix() {
+
+		// First I get the hosts name
+		// This one never contains the DNS suffix (Don't know if that is the case for all VM vendors)
+		String hostName = null;
+		try
+		{
+			hostName = InetAddress.getLocalHost().getHostName().toLowerCase();
+		} catch (UnknownHostException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Alsways convert host names to lower case. Host names are 
+		// case insensitive and I want to simplify comparison.
+
+		// Then I iterate over all network adapters that might be of interest
+		Enumeration<NetworkInterface> ifs = null;
+		try
+		{
+			ifs = NetworkInterface.getNetworkInterfaces();
+		} catch (SocketException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (ifs == null) return ""; // Might be null
+
+		for (NetworkInterface iF : Collections.list(ifs)) { // convert enumeration to list.
+		    try
+			{
+				if (!iF.isUp()) continue;
+			} catch (SocketException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		    for (InetAddress address : Collections.list(iF.getInetAddresses())) {
+		        if (address.isMulticastAddress()) continue;
+
+		        // This name typically contains the DNS suffix. Again, at least on Oracle JDK
+		        String name = address.getHostName().toLowerCase();
+		        System.out.println(name);
+		        if (name.startsWith(hostName)) {
+		            String dnsSuffix = name.substring(hostName.length());
+		            if (dnsSuffix.startsWith(".")) return dnsSuffix;
+		        }
+		    }
+		}
+
+		return "";
+		}
 }

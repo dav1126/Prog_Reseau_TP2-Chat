@@ -224,6 +224,8 @@ public class Server
 			{
 				UDPSocket = new DatagramSocket(UDP_SOCKET_NUMBER);
 				UDPSocket.setBroadcast(true);
+				ChatModel.getInstance().getStatusMessagesList().add(
+						"Server UDP socket openend");
 			} 
 			catch (SocketException e)
 			{
@@ -235,9 +237,11 @@ public class Server
 	}
 	
 	/**
-	 * Receive broadcast messages from remote clients.
+	 * Receive broadcast messages from remote clients, and sens back a username
+	 * Used to be be shown as available for chat on remote users apps. Repeated
+	 * each 5 seconds for a refresh. 
 	 */
-	public void receiveBroadcastRequest()
+	public void receiveBroadcastRequests(String username)
 	{
 		
 		Thread thread =  new Thread(() ->
@@ -263,7 +267,7 @@ public class Server
 				String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
 				System.out.println( "BroadCast request from: " + remoteIpAddress);
 				//Send a response to the remote client
-				byte[] bufferResponse = new byte[1];
+				byte[] bufferResponse = username.getBytes();
 				DatagramPacket responsePacket = new DatagramPacket
 						(bufferResponse, bufferResponse.length, 
 								remoteHostPacket.getAddress(), 

@@ -12,7 +12,7 @@
             <HBox prefHeight="32.0" prefWidth="293.0">
                <children>
                   <Label text="Nom d'utilisateur : " />
-                  <TextField fx:id="textFieldNomUtilisateur">
+                  <TextField fx:id="textFieldNomUtilisateur" editable="false">
                      <HBox.margin>
                         <Insets left="8.0" />
                      </HBox.margin>
@@ -83,7 +83,7 @@
       </HBox>
       <Label layoutX="314.0" layoutY="64.0" text="Messages application:" />
       <Label layoutX="636.0" layoutY="84.0" text="Usagers disponibles sur réseau:" />
-      <ChoiceBox fx:id="reseauxChoiceBox" layoutX="636.0" layoutY="47.0" prefHeight="25.0" prefWidth="200.0" />
-      <Label layoutX="636.0" layoutY="27.0" text="Réseau:" />
+      <Label layoutX="636.0" layoutY="27.0" text="Réseau local:" />
+      <Label fx:id="reseauLocalLabel" layoutX="636.0" layoutY="51.0" text="dsn de reseau local ici" />
    </children>
 </AnchorPane>
