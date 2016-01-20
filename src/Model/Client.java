@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
@@ -269,7 +271,7 @@ public class Client
 	{	//J'Ai utilisé le lAN2 est cest ce qui est renvoyé par localhost...je dois utiliser le lan1******************************* 
 		Thread thread =  new Thread(() ->
 		{
-			//Keep checking for new 
+			//Keep checking for new remote users
 			while (true)
 			{
 				//Wait for the UDPsocket to be openend (done by another thread)
@@ -285,34 +287,39 @@ public class Client
 					}
 				}
 				
-				//Get the subnet (works for /16 subnets only)
-				String localAddress = null;
-				try
-				{
-					localAddress = InetAddress.getLocalHost().getHostAddress();
-					System.out.println("bla" +localAddress);
-				} catch (Exception e1)
-				{
-					
-					e1.printStackTrace();
-				}
-				String[] ipSplit = localAddress.split("\\.");
-				String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
-						ipSplit[1] + ".";
+				//Get the broadcast address of the LAN
 				
-				//Create the broadcast address
-				String broadcastAddress = subnetworkPartOfIpAddress + "255.255";
-				System.out.println("BROADCAST:" +broadcastAddress);
+				
+				//Get the subnet (works for /16 subnets only)
+//				String localAddress = null;
+//				try
+//				{
+//					localAddress = InetAddress.getLocalHost().getHostAddress();
+//					System.out.println("bla" +localAddress);
+//				} catch (Exception e1)
+//				{
+//					
+//					e1.printStackTrace();
+//				}
+//				String[] ipSplit = localAddress.split("\\.");
+//				String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
+//						ipSplit[1] + ".";
+//				
+//				//Create the broadcast address
+//				String broadcastAddress = subnetworkPartOfIpAddress + "255.255";
+//				System.out.println("BROADCAST:" +broadcastAddress);
+//				InetAddress brodcastInetAddress = null;
+				
 				InetAddress brodcastInetAddress = null;
 				try
 				{
-					brodcastInetAddress = InetAddress.getByName(broadcastAddress);
+					brodcastInetAddress = getLANBroadcastAddress();
 				} 
-				catch (UnknownHostException e)
+				catch (Exception e1)
 				{
-					System.out.println("Client could not create broadcast address");
-					e.printStackTrace();
+					e1.printStackTrace();
 				}
+				
 				byte[] buffer = new byte[1];
 				DatagramPacket brodcastPacket = new DatagramPacket
 						(buffer, buffer.length, brodcastInetAddress, UDP_SOCKET_NUMBER);
@@ -356,10 +363,10 @@ public class Client
 				}
 				System.out.println("Chat available with: " + username);
 				
-				//Put the thread to sleep for 5 seconds
+				//Put the thread to sleep for 2 seconds
 				try
 				{
-					Thread.sleep(5000);
+					Thread.sleep(2000);
 				} 
 				catch (Exception e)
 				{
@@ -430,4 +437,40 @@ public class Client
 
 		return "";
 		}
+	
+	public InetAddress getLANBroadcastAddress() throws SocketException
+	{
+		InetAddress broadcastAddress = null;
+		
+		mainloop:for (
+			    final Enumeration< NetworkInterface > interfaces =
+			        NetworkInterface.getNetworkInterfaces( );
+			    interfaces.hasMoreElements( );
+			)
+			{
+			    final NetworkInterface cur = interfaces.nextElement( );
+
+			    if ( cur.isLoopback( ) )
+			    {
+			        continue;
+			    }
+			    
+			    
+			    for ( final InterfaceAddress addr : cur.getInterfaceAddresses( ) )
+			    {
+			        final InetAddress inet_addr = addr.getAddress( );
+
+			        if ( !( inet_addr instanceof Inet4Address ) )
+			        {
+			            continue;
+			        }
+			        
+			        broadcastAddress = addr.getBroadcast( );
+			        System.out.println("Broadcast address found: " 
+			        		+ broadcastAddress.getHostAddress());
+			        break mainloop;
+			    }
+			}
+		return broadcastAddress;
+	}
 }
