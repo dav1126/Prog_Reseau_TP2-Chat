@@ -17,7 +17,15 @@ public class Test
 		
 		//File file = new File("C:\\mshtml.dll");
 		
-//		Server server = new Server();
+		Server server = new Server();
+		try
+		{
+			server.getLANIPAddress();
+		} catch (SocketException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		server.startOpenSocketThread(55555);
 //		
 //		System.out.println("test");
@@ -34,16 +42,25 @@ public class Test
 //		server.startReceiveMessageThread();
 		
 		
-		Client client = new Client();
-	client.findDnsSuffix();
-	try
-	{
-		client.getLANBroadcastAddress();
-	} catch (SocketException e)
-	{
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+//		Client client = new Client();
+//		try
+//		{
+//			client.getLANBroadcastAddress();
+//		} catch (SocketException e)
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	client.findDnsSuffix();
+//	try
+//	{
+//		client.getLANBroadcastAddress();
+//	} catch (SocketException e)
+//	{
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+		
 	
 ////		client.openClientSocket("172.18.10.22", 55555);
 //		client.openUDPSocket();

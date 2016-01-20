@@ -7,9 +7,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -266,14 +272,22 @@ public class Server
 				UDPSocket.receive(remoteHostPacket);
 				String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
 				System.out.println( "BroadCast request from: " + remoteIpAddress);
-				//Send a response to the remote client
-				byte[] bufferResponse = username.getBytes();
-				DatagramPacket responsePacket = new DatagramPacket
-						(bufferResponse, bufferResponse.length, 
-								remoteHostPacket.getAddress(), 
-								remoteHostPacket.getPort());
-				UDPSocket.send(responsePacket);
-				System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+				
+				if (!remoteIpAddress.equals(getLANIPAddress()))
+				{
+					//Send a response to the remote client
+					byte[] bufferResponse = username.getBytes();
+					DatagramPacket responsePacket = new DatagramPacket
+							(bufferResponse, bufferResponse.length, 
+									remoteHostPacket.getAddress(), 
+									remoteHostPacket.getPort());
+					UDPSocket.send(responsePacket);
+					System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+				}
+				else
+				{
+					System.out.println("Broadcast request sent from own client. Request ignored.");
+				}
 			} 
 			catch (IOException e)
 			{
@@ -334,5 +348,41 @@ public class Server
 			receiveMessage();
 		});
 		thread.start();
+	}
+	
+	public String getLANIPAddress() throws SocketException
+	{
+		String lanAddress = null;
+		
+		mainloop:for (
+			    final Enumeration< NetworkInterface > interfaces =
+			        NetworkInterface.getNetworkInterfaces( );
+			    interfaces.hasMoreElements( );
+			)
+			{
+			    final NetworkInterface cur = interfaces.nextElement( );
+
+			    if ( cur.isLoopback( ) )
+			    {
+			        continue;
+			    }
+			    
+			    
+			    for ( final InterfaceAddress addr : cur.getInterfaceAddresses( ) )
+			    {
+			        final InetAddress inet_addr = addr.getAddress( );
+
+			        if ( !( inet_addr instanceof Inet4Address ) )
+			        {
+			            continue;
+			        }
+ 
+					lanAddress = inet_addr.getHostAddress();
+			        System.out.println("Server LAN address found: " 
+			        		+ lanAddress);
+			        break mainloop;
+			    }
+			}
+		return lanAddress;
 	}
 }
