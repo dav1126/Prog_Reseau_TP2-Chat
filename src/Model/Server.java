@@ -264,36 +264,42 @@ public class Server
 					e.printStackTrace();
 				}
 			}
-			//Buffer to receive the broadcast request
-			byte[] buffer = new byte[1];
-			DatagramPacket remoteHostPacket = new DatagramPacket(buffer, buffer.length);
-			try
+			boolean broadcastRequestDetected = true;
+			
+			//Keep the server waiting for broadcast request
+			while (true)
 			{
-				UDPSocket.receive(remoteHostPacket);
-				String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
-				System.out.println( "BroadCast request from: " + remoteIpAddress);
-				
-				if (!remoteIpAddress.equals(getLANIPAddress()))
+				//Buffer to receive the broadcast request
+				byte[] buffer = new byte[1];
+				DatagramPacket remoteHostPacket = new DatagramPacket(buffer, buffer.length);
+				try
 				{
-					//Send a response to the remote client
-					byte[] bufferResponse = username.getBytes();
-					DatagramPacket responsePacket = new DatagramPacket
-							(bufferResponse, bufferResponse.length, 
-									remoteHostPacket.getAddress(), 
-									remoteHostPacket.getPort());
-					UDPSocket.send(responsePacket);
-					System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+					UDPSocket.receive(remoteHostPacket);
+					String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
+					System.out.println( "BroadCast request from: " + remoteIpAddress);
+					
+					if (!remoteIpAddress.equals(getLANIPAddress()))
+					{
+						//Send a response to the remote client
+						byte[] bufferResponse = username.getBytes();
+						DatagramPacket responsePacket = new DatagramPacket
+								(bufferResponse, bufferResponse.length, 
+										remoteHostPacket.getAddress(), 
+										remoteHostPacket.getPort());
+						UDPSocket.send(responsePacket);
+						System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+					}
+					else
+					{
+						System.out.println("Broadcast request sent from own client. Request ignored.");
+					}
 				}
-				else
+				catch (IOException e)
 				{
-					System.out.println("Broadcast request sent from own client. Request ignored.");
+					System.out.println("UDP Packet reception failed");
+					e.printStackTrace();
 				}
 			} 
-			catch (IOException e)
-			{
-				System.out.println("UDP Packet reception failed");
-				e.printStackTrace();
-			}
 		});
 		
 		thread.start();

@@ -268,7 +268,7 @@ public class Client
 	 *  @param ipAddress given ip address
 	 */
 	public void getRemoteUserAvailableForChat()
-	{	//J'Ai utilisé le lAN2 est cest ce qui est renvoyé par localhost...je dois utiliser le lan1******************************* 
+	{	
 		Thread thread =  new Thread(() ->
 		{
 			//Keep checking for new remote users
