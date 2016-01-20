@@ -350,7 +350,7 @@ public class Client
 					e.printStackTrace();
 				}
 				
-				String responseFromServer = new String(responsePacket.getData()).trim();
+				String responseFromServer = new String(responsePacket.getData());
 				//If the server's response if not the ignore code
 				if (!responseFromServer.equals(BROADCAST_ANSWER_IGNORE_CODE))
 				{
@@ -361,13 +361,17 @@ public class Client
 					String remoteMachineIp = responsePacket.getAddress().getHostName();
 			
 					
-					//Add the remote machine ip address to the available for chat list
-					synchronized (lock)
+					//if the ip of the server is not already in the available for chat list
+					if (!ChatModel.getInstance().getUserAvailableToChatMap().containsKey(remoteMachineIp))
 					{
-						Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
-						ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+						//Add the remote machine ip address to the available for chat list
+						synchronized (lock)
+						{
+							Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
+							ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+						}
+						System.out.println("Chat available with: " + username);
 					}
-					System.out.println("Chat available with: " + username);
 				}
 				
 				//Put the thread to sleep for 2 seconds
