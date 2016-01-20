@@ -29,6 +29,8 @@ public class Client
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
 	private static final int UDP_SOCKET_NUMBER = 5556;
 	private static final int SERVER_SOCKET_NUMBER = 5555;
+	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
+			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
 	
 	/**
 	 * Objet servant a locker la liste observable de Ip atteignable
@@ -335,7 +337,8 @@ public class Client
 				System.out.println("Brodcast message sent from client.");
 				
 				//Wait for a response from a server, the server responds with
-				//the username specified by the user
+				//the username specified by the user or an ignore code if the 
+				//answer is from the program own server
 				byte[] bufferResponse = new byte[1024];
 				DatagramPacket responsePacket = new DatagramPacket(bufferResponse, bufferResponse.length);
 				try
@@ -346,22 +349,26 @@ public class Client
 				{
 					e.printStackTrace();
 				}
-				System.out.println("test");
-				//Get the username sent by the server
 				
-				String username = new String(responsePacket.getData()).trim();
-				
-				//Get the ip address of the responding machine
-				String remoteMachineIp = responsePacket.getAddress().getHostName();
-		
-				
-				//Add the remote machine ip address to the available for chat list
-				synchronized (lock)
+				String responseFromServer = new String(responsePacket.getData()).trim();
+				//If the server's response if not the ignore code
+				if (!responseFromServer.equals(BROADCAST_ANSWER_IGNORE_CODE))
 				{
-					Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
-					ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+					//Get the username sent by the server				
+					String username = new String(responsePacket.getData()).trim();
+					
+					//Get the ip address of the responding machine
+					String remoteMachineIp = responsePacket.getAddress().getHostName();
+			
+					
+					//Add the remote machine ip address to the available for chat list
+					synchronized (lock)
+					{
+						Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
+						ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+					}
+					System.out.println("Chat available with: " + username);
 				}
-				System.out.println("Chat available with: " + username);
 				
 				//Put the thread to sleep for 2 seconds
 				try
