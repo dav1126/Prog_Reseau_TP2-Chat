@@ -271,26 +271,23 @@ public class Client
 	{	
 		Thread thread =  new Thread(() ->
 		{
-			//Keep checking for new remote users
-			while (true)
+			//Wait for the UDPsocket to be openend (done by another thread)
+			while (UDPsocket == null)
 			{
-				//Wait for the UDPsocket to be openend (done by another thread)
-				while (UDPsocket == null)
+				try
 				{
-					try
-					{
-						Thread.sleep(10);
-					} catch (Exception e)
-					{
-						System.out.println("Get remote ips thread sleep error");
-						e.printStackTrace();
-					}
+					Thread.sleep(10);
+				} catch (Exception e)
+				{
+					System.out.println("Get remote ips thread sleep error");
+					e.printStackTrace();
 				}
-				
-				//Get the broadcast address of the LAN
-				
-				
-				//Get the subnet (works for /16 subnets only)
+			}
+			
+			//Get the broadcast address of the LAN
+			
+			
+			//Get the subnet (works for /16 subnets only)
 //				String localAddress = null;
 //				try
 //				{
@@ -309,17 +306,20 @@ public class Client
 //				String broadcastAddress = subnetworkPartOfIpAddress + "255.255";
 //				System.out.println("BROADCAST:" +broadcastAddress);
 //				InetAddress brodcastInetAddress = null;
-				
-				InetAddress brodcastInetAddress = null;
-				try
-				{
-					brodcastInetAddress = getLANBroadcastAddress();
-				} 
-				catch (Exception e1)
-				{
-					e1.printStackTrace();
-				}
-				
+			
+			InetAddress brodcastInetAddress = null;
+			try
+			{
+				brodcastInetAddress = getLANBroadcastAddress();
+			} 
+			catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
+			
+			//Keep checking for new remote users
+			while (true)
+			{	
 				byte[] buffer = new byte[1];
 				DatagramPacket brodcastPacket = new DatagramPacket
 						(buffer, buffer.length, brodcastInetAddress, UDP_SOCKET_NUMBER);
@@ -358,7 +358,7 @@ public class Client
 				//Add the remote machine ip address to the available for chat list
 				synchronized (lock)
 				{
-					ChatModel.getInstance().getAvailableForChatIpAddressList().add(username);
+					Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
 					ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
 				}
 				System.out.println("Chat available with: " + username);

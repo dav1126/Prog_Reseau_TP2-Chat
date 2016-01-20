@@ -1,6 +1,7 @@
 package Model;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javafx.collections.FXCollections;
@@ -25,6 +26,7 @@ public class ChatModel
 		statusMessagesList = FXCollections.observableArrayList();
 		chatMessagesList =FXCollections.observableArrayList();
 		availableForChatIpAddressList = FXCollections.observableArrayList();
+		userAvailableToChatMap = new HashMap<>();
 	}
 	
 	public ObservableList<String> getChatMessagesList()

@@ -33,6 +33,8 @@ public class Server
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
 	private static final int UDP_SOCKET_NUMBER = 5556;
 	private static final int SERVER_SOCKET_NUMBER = 5555;
+	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
+			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
 	
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -266,6 +268,15 @@ public class Server
 			}
 			boolean broadcastRequestDetected = true;
 			
+			String lanIPAddress = null;
+			try
+			{
+				lanIPAddress = getLANIPAddress();
+			} catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
+			
 			//Keep the server waiting for broadcast request
 			while (true)
 			{
@@ -277,10 +288,10 @@ public class Server
 					UDPSocket.receive(remoteHostPacket);
 					String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
 					System.out.println( "BroadCast request from: " + remoteIpAddress);
-					
-					if (!remoteIpAddress.equals(getLANIPAddress()))
+					//If the broadcast message is from a remote client
+					if (!remoteIpAddress.equals(lanIPAddress))
 					{
-						//Send a response to the remote client
+						//Send a positibe response to the remote client
 						byte[] bufferResponse = username.getBytes();
 						DatagramPacket responsePacket = new DatagramPacket
 								(bufferResponse, bufferResponse.length, 
@@ -289,9 +300,19 @@ public class Server
 						UDPSocket.send(responsePacket);
 						System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
 					}
+					//If the broadcast message is from this program's own client
 					else
-					{
-						System.out.println("Broadcast request sent from own client. Request ignored.");
+					{	
+						//Send an ignore response to this programs own  client
+						byte[] bufferResponse = 
+								BROADCAST_ANSWER_IGNORE_CODE.getBytes();
+						DatagramPacket responsePacket = new DatagramPacket
+								(bufferResponse, bufferResponse.length, 
+										remoteHostPacket.getAddress(), 
+										remoteHostPacket.getPort());
+						UDPSocket.send(responsePacket);
+						System.out.println
+						("Broadcast answer ignore code sent to own client.");
 					}
 				}
 				catch (IOException e)
