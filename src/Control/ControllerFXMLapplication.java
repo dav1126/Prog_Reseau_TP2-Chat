@@ -10,6 +10,7 @@ import Model.Client;
 import Model.Server;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -185,37 +186,44 @@ public class ControllerFXMLapplication implements Initializable{
 	    	        	server.getChatRequestedBooleanProperty().setValue(false);
 	    	        	
 	    	        	//Pop an alert asking this server's user if he wants to accept the chat request
-	    	        	Alert alert = new Alert(AlertType.INFORMATION);
-	    	        	alert.setTitle("Chat request");
-	    	        	alert.setHeaderText(null);
-	    	        	alert.setContentText(server.getChatRequestApplicantUsername() + " veux chatter avec vous!\n Vous avez 10 secondes pour répondre...");
-
-	    	        	ButtonType buttonTypeAccepter = new ButtonType("Accepter");
-	    	        	ButtonType buttonTypeRefuser = new ButtonType("Refuser");
-	    	        	
-	    	        	Timeline idlestage = new Timeline( new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>()
-	    	        		    {
-
-	    	        		        @Override
-	    	        		        public void handle( ActionEvent event )
-	    	        		        {
-	    	        		            alert.setResult(buttonTypeRefuser);
-	    	        		            alert.close();
-	    	        		        }
-	    	        		    } ) );
-	        		    idlestage.setCycleCount( 1 );
-	        		    idlestage.play();
-	        		    Optional <ButtonType> choix = alert.showAndWait();
-	        		    
-	        		    if (choix.get() == buttonTypeAccepter)
-	        		    {
-	        		        client.openClientSocket(server.getChatRequestApplicantIp());
-	        		        server.setChatRequestAccepted(true);
-	        		    }
-	        		    else
-	        		    	server.setChatRequestAccepted(false);
-	        		    
-	        		    server.getReceiveMessageThread().notify();
+	    	        	Platform.runLater(new Runnable()
+	    	        	{
+	    	        		@Override
+	    	        		public void run()
+	    	        		{	    	        		
+		    	        		Alert alert = new Alert(AlertType.INFORMATION);
+			    	        	alert.setTitle("Chat request");
+			    	        	alert.setHeaderText(null);
+			    	        	alert.setContentText(server.getChatRequestApplicantUsername() + " veux chatter avec vous!\n Vous avez 10 secondes pour répondre...");
+		
+			    	        	ButtonType buttonTypeAccepter = new ButtonType("Accepter");
+			    	        	ButtonType buttonTypeRefuser = new ButtonType("Refuser");
+			    	        	
+			    	        	Timeline idlestage = new Timeline( new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>()
+			    	        		    {
+		
+			    	        		        @Override
+			    	        		        public void handle( ActionEvent event )
+			    	        		        {
+			    	        		            alert.setResult(buttonTypeRefuser);
+			    	        		            alert.close();
+			    	        		        }
+			    	        		    } ) );
+			        		    idlestage.setCycleCount( 1 );
+			        		    idlestage.play();
+			        		    Optional <ButtonType> choix = alert.showAndWait();
+			        		    
+			        		    if (choix.get() == buttonTypeAccepter)
+			        		    {
+			        		        client.openClientSocket(server.getChatRequestApplicantIp());
+			        		        server.setChatRequestAccepted(true);
+			        		    }
+			        		    else
+			        		    	server.setChatRequestAccepted(false);
+			        		    
+			        		    server.getReceiveMessageThread().notify();
+	    	        		}
+	    	        	});
 	    	        }
 	    	    }
 	    	});
