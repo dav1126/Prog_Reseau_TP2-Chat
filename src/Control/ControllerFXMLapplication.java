@@ -143,8 +143,9 @@ public class ControllerFXMLapplication implements Initializable{
 	    	server.openUDPSocket();
 	    	server.receiveBroadcastRequests(textFieldNomUtilisateur.getText());
 	    	
-	    	//Open the server socket to receive messages from clients
+	    	//Open the server socket and start to wait for message
 	    	server.openServerSockets();
+	    	server.startReceiveMessageThread();
 	    	
 	    	//Open the client socket used to send UDP broadcast to remote servers
 	    	client.openUDPSocket();

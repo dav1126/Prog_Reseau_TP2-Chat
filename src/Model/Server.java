@@ -77,92 +77,100 @@ public class Server
 	private synchronized void receiveMessage()
 	{
 		String msgInput = null;
-		if(serverSocket != null && clientSocket != null)
+		try
 		{
-			try
+			InputStream bIStream = clientSocket.getInputStream();
+			
+			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+			int count = bIStream.read(byteBuffer);
+			msgInput = "";
+			
+			
+			for (int i = 0; i < count ; i++)
+				{
+					msgInput += (char)byteBuffer[i];
+					//System.out.println((char)byteBuffer[i]);
+					//System.out.println(msgInput);
+				}
+			
+			System.out.println("Received Message" + msgInput);
+			
+			//If the received message is the file transmission alert message
+			if (msgInput.compareTo(FILE_TRANSMISSION_ALERT_MSG) == 0)
 			{
-				InputStream bIStream = clientSocket.getInputStream();
+				//Confirm the reception of the file transmission alert t
+				//the client
+				OutputStream bOStream = clientSocket.getOutputStream();
+				String msg = "File transmission alert received. Waiting for file name...";
+				bOStream.write(msg.getBytes());
+				bOStream.flush();
 				
-				byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
-				int count = bIStream.read(byteBuffer);
-				msgInput = "";
-				
-				
-				for (int i = 0; i < count ; i++)
-					{
-						msgInput += (char)byteBuffer[i];
-						//System.out.println((char)byteBuffer[i]);
-						//System.out.println(msgInput);
-					}
-				
-				System.out.println("Received Message" + msgInput);
-				
-				//If the received message is the file transmission alert message
-				if (msgInput.compareTo(FILE_TRANSMISSION_ALERT_MSG) == 0)
-				{
-					//Confirm the reception of the file transmission alert t
-					//the client
-					OutputStream bOStream = clientSocket.getOutputStream();
-					String msg = "File transmission alert received. Waiting for file name...";
-					bOStream.write(msg.getBytes());
-					bOStream.flush();
-					
-					//Receive the file
-					startReceiveFile();
-				}
-				
-				//If the received message is the start chat request code
-				else if (msgInput.contains(CHAT_REQUEST_CODE))
-				{
-					chatRequestApplicantUsername = msgInput.substring(CHAT_REQUEST_CODE.length());
-					chatRequestApplicantIp = clientSocket.getInetAddress().getHostAddress();
-					System.out.println("Server detected a chat request from :" + chatRequestApplicantUsername + "  " + chatRequestApplicantIp);
-					
-					//This boolean property change triggers a listener that pops an alert asking the user to 
-					//accept or refuse the chat request (see in ControllerFXMLApplication class).
-					//The use choice changes the chatRequestAccepted attribute
-					chatRequestedBooleanProperty.setValue(true);
-					
-					//Make this thread wait for an answer from the user
-					try
-					{
-						receiveMessageThread.wait();
-					} catch (InterruptedException e)
-					{
-						System.out.println("Server receive mesage thread wait error.");
-						e.printStackTrace();
-					}
-					
-					//Prepare the answer to the request base on the choice of the user
-					String answer = "no";
-					if (chatRequestAccepted)
-						answer = "yes";
-					
-					//Send the answer back to the request applicant
-					OutputStream bOStream = clientSocket.getOutputStream();
-					bOStream.write(answer.getBytes());
-					bOStream.flush();
-				}
+				//Receive the file
+				startReceiveFile();
 			}
-			catch (IOException e)
+			
+			//If the received message is the start chat request code
+			else if (msgInput.contains(CHAT_REQUEST_CODE))
 			{
-				System.out.println("Could not receive message.");
-				e.printStackTrace();
+				chatRequestApplicantUsername = msgInput.substring(CHAT_REQUEST_CODE.length());
+				chatRequestApplicantIp = clientSocket.getInetAddress().getHostAddress();
+				System.out.println("Server detected a chat request from :" + chatRequestApplicantUsername + "  " + chatRequestApplicantIp);
+				
+				//This boolean property change triggers a listener that pops an alert asking the user to 
+				//accept or refuse the chat request (see in ControllerFXMLApplication class).
+				//The use choice changes the chatRequestAccepted attribute
+				chatRequestedBooleanProperty.setValue(true);
+				
+				//Make this thread wait for an answer from the user
+				try
+				{
+					receiveMessageThread.wait();
+				} catch (InterruptedException e)
+				{
+					System.out.println("Server receive mesage thread wait error.");
+					e.printStackTrace();
+				}
+				
+				//Prepare the answer to the request base on the choice of the user
+				String answer = "no";
+				if (chatRequestAccepted)
+					answer = "yes";
+				
+				//Send the answer back to the request applicant
+				OutputStream bOStream = clientSocket.getOutputStream();
+				bOStream.write(answer.getBytes());
+				bOStream.flush();
 			}
 		}
-		else
+		catch (IOException e)
 		{
-			System.out.println("Could not receive message: server's sockets are null");
+			System.out.println("Could not receive message.");
+			e.printStackTrace();
 		}
 	}
-	
-	public void startReceiveMessage()
+	/**
+	 * Creates and start a thread that wait for a message to come through the 
+	 *  opened channel. 
+	 */
+	public void startReceiveMessageThread()
 	{
 		receiveMessageThread =  new Thread(() ->
 		{
 			//Keep waiting for new messages
 			while (true)
 			{
+				while (serverSocket == null || clientSocket == null)
+				{
+					try
+					{
+						Thread.sleep(10);
+					} 
+					catch (Exception e)
+					{
+						System.out.println("Server receive file thread sleep error");
+						e.printStackTrace();
+					}
+				}
 				receiveMessage();
 			}
 		});
@@ -417,19 +425,6 @@ public class Server
 		Thread thread =  new Thread(() ->
 		{
 			openServerSockets();
-		});
-		thread.start();
-	}
-	
-	/**
-	 * Creates and start a thread that wait for a message to come through the 
-	 *  opened channel. 
-	 */
-	public void startReceiveMessageThread()
-	{
-		Thread thread =  new Thread(() ->
-		{
-			receiveMessage();
 		});
 		thread.start();
 	}
