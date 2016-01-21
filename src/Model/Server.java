@@ -41,6 +41,7 @@ public class Server
 	private String chatRequestApplicantUsername;
 	private String chatRequestApplicantIp;
 	Thread receiveMessageThread;
+	Object receiveMessageThreadLock = new Object();
 
 	private boolean chatRequestAccepted =  false;
 
@@ -122,13 +123,16 @@ public class Server
 				chatRequestedBooleanProperty.setValue(true);
 				
 				//Make this thread wait for an answer from the user
-				try
+				synchronized (receiveMessageThreadLock)
 				{
-					receiveMessageThread.wait();
-				} catch (InterruptedException e)
-				{
-					System.out.println("Server receive mesage thread wait error.");
-					e.printStackTrace();
+					try
+					{
+						receiveMessageThreadLock.wait();
+					} catch (InterruptedException e)
+					{
+						System.out.println("Server receive mesage thread wait error.");
+						e.printStackTrace();
+					}
 				}
 				
 				//Prepare the answer to the request base on the choice of the user
@@ -499,5 +503,10 @@ public class Server
 	public Thread getReceiveMessageThread()
 	{
 		return receiveMessageThread;
+	}
+	
+	public Object getReceiveMessageThreadLock()
+	{
+		return receiveMessageThreadLock;
 	}
 }

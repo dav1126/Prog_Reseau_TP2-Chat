@@ -221,7 +221,7 @@ public class ControllerFXMLapplication implements Initializable{
 			        		    else
 			        		    	server.setChatRequestAccepted(false);
 			        		    
-			        		    server.getReceiveMessageThread().notify();
+			        		    server.getReceiveMessageThreadLock().notify();
 	    	        		}
 	    	        	});
 	    	        }
