@@ -17,6 +17,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javafx.application.Platform;
 
@@ -26,16 +34,22 @@ public class Client
 	DatagramSocket UDPsocket;
 	private static final int MAX_TRANSMISSION_BYTE_SIZE = 10000000;
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
-			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
+			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(*ALPHA";
 	private static final int UDP_SOCKET_NUMBER = 5556;
 	private static final int SERVER_SOCKET_NUMBER = 5555;
 	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
 			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
+	private static final String CHAT_REQUEST_CODE = 
+			"Yhwa6WY6ywiob8W*0!90aw9898awWAJm(7(";
+	private boolean chatRequestAccepted = false;
+	private Thread sendChatRequestThread;
+	private ChatModel chatModel = ChatModel.getInstance();
 	
 	/**
 	 * Objet servant a locker la liste observable de Ip atteignable
 	 */
 		Object lock = new Object();
+
 
 	public void openClientSocket(String remoteIpAddress)
 	{
@@ -61,6 +75,11 @@ public class Client
 			}
 		});
 		thread.start();
+	}
+	
+	public boolean isChatRequestAccepted()
+	{
+		return chatRequestAccepted;
 	}
 
 	public void sendMessage(String message)
@@ -93,24 +112,36 @@ public class Client
 		thread.start();
 	}
 
-	public void closeSockets()
+	public void closeClientSocket()
 	{
 		if (clientSocket != null)
 		{
 			try
 			{
 				clientSocket.close();
-				UDPsocket.close();
 			} catch (IOException e)
 			{
-				System.out.println("Client sockets could not be closed");
+				System.out.println("Client socket could not be closed");
 				clientSocket = null;
 				e.printStackTrace();
 			}
 		} else
 		{
 			System.out
-					.println("Could not close client sockets");
+					.println("Could not close client socket");
+		}
+	}
+	
+	public void closeClientUDPSocket()
+	{
+		if (UDPsocket != null)
+		{
+				UDPsocket.close();
+			
+		} else
+		{
+			System.out
+					.println("Couldnot close UDP client socket");
 		}
 	}
 
@@ -350,7 +381,7 @@ public class Client
 					e.printStackTrace();
 				}
 				
-				String responseFromServer = new String(responsePacket.getData());
+				String responseFromServer = new String(responsePacket.getData()).trim();
 				//If the server's response if not the ignore code
 				if (!responseFromServer.equals(BROADCAST_ANSWER_IGNORE_CODE))
 				{
@@ -358,17 +389,23 @@ public class Client
 					String username = new String(responsePacket.getData()).trim();
 					
 					//Get the ip address of the responding machine
-					String remoteMachineIp = responsePacket.getAddress().getHostName();
+					String remoteMachineIp = responsePacket.getAddress().getHostAddress();
 			
 					
 					//if the ip of the server is not already in the available for chat list
-					if (!ChatModel.getInstance().getUserAvailableToChatMap().containsKey(remoteMachineIp))
+					if (!chatModel.getUserAvailableToChatMap().containsKey(username))
 					{
 						//Add the remote machine ip address to the available for chat list
 						synchronized (lock)
 						{
-							Platform.runLater(() -> ChatModel.getInstance().getAvailableForChatIpAddressList().add(username));
-							ChatModel.getInstance().getUserAvailableToChatMap().put(remoteMachineIp, username);
+							Platform.runLater(() -> 
+								chatModel.
+								getAvailableForChatUsersList().add(username));
+							Platform.runLater(() -> 
+								chatModel.getStatusMessagesList().add
+								("New online user detected: " + username));
+							chatModel.getUserAvailableToChatMap().
+								put(username, remoteMachineIp);
 						}
 						System.out.println("Chat available with: " + username);
 					}
@@ -483,5 +520,136 @@ public class Client
 			    }
 			}
 		return broadcastAddress;
+	}
+	
+	public void sendChatRequest(String username)
+	{
+		//Make sure the chatResquestAccepted flag is false
+		chatRequestAccepted = false;
+		
+		sendChatRequestThread =  new Thread(() ->
+		{
+			//Wait for the clientSocket to be openend 
+			//(this is done in another thread)
+			while (clientSocket == null)
+			{
+				try
+				{
+					Thread.sleep(10);
+				} catch (Exception e)
+				{
+					System.out.println("Chat request thread sleep error");
+					e.printStackTrace();
+				}
+			}
+			
+			try
+			{
+				//Send a chat request to the remote user
+				OutputStream output = clientSocket.getOutputStream();
+				String message = CHAT_REQUEST_CODE + username;
+				output.write(message.getBytes());
+				
+				//Get an answer in another thread
+				getAnswerToChatRequest();
+				
+				//Make this thread wait for an answer before to continue
+				try
+				{
+					sendChatRequestThread.wait();
+				} catch (Exception e)
+				{
+					System.out.println("Chat request thread wait error");
+					e.printStackTrace();
+				}
+				
+			} catch (IOException e)
+			{
+				System.out.println("Chat request could not be sent");
+				e.printStackTrace();
+			}
+		});
+		sendChatRequestThread.start();
+	}
+	/**
+	 * Wait 10 seconds for an answer to the chat request from the remote user.
+	 * Changes the boolean chatRequestAccepted depending on the answer
+	 */
+	
+	private void getAnswerToChatRequest()
+	{
+		ExecutorService service = Executors.newSingleThreadExecutor();
+
+		try {
+		    Runnable r = new Runnable() 
+		    {
+		        @Override
+		        public void run() 
+		        {
+			        try
+			        {
+			        	InputStream bIStream = clientSocket.getInputStream();
+						
+						byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
+						int count = bIStream.read(byteBuffer);
+						String responseFromServer = "";
+						
+						
+						for (int i = 0; i < count ; i++)
+							{
+							responseFromServer += (char)byteBuffer[i];
+							}
+						
+						if ((responseFromServer.trim()).equals("yes"))
+						{
+							chatRequestAccepted = true;
+							Platform.runLater(() ->
+							chatModel.getStatusMessagesList().add("Chat resquest accepted by remote user."));
+						}
+						else
+						{
+							chatRequestAccepted = false;
+							Platform.runLater(() ->
+							chatModel.getStatusMessagesList().add("Chat resquest refused by remote user."));
+						}
+						
+						//If the remote user answered, notify the waiting sendChatRequestThread
+						sendChatRequestThread.notify();
+			        }
+			        catch (IOException e)
+			        {
+			        	System.out.println("Error, client could not receive answer to chat request.");
+			        	e.printStackTrace();
+			        }
+		        }
+		    };
+
+		    Future<?> f = service.submit(r);
+
+		    f.get(10, TimeUnit.SECONDS);     // attempt the task for 10 seconds
+		}
+		catch (final InterruptedException e) 
+		{
+		    // The thread was interrupted during sleep, wait or join
+			e.printStackTrace();
+		}
+		catch (final TimeoutException e) 
+		{
+		    // Took too long!
+			//Notify the waiting sendChatRequestThread
+			System.out.println("Remote user didn't answer to the chat request");
+			Platform.runLater(() ->
+			chatModel.getStatusMessagesList().add("No answer from remote user."));
+			sendChatRequestThread.notify();
+			
+		}
+		catch (final ExecutionException e) 
+		{
+		    // An exception from within the Runnable task
+			e.printStackTrace();
+		}
+		finally {
+		    service.shutdown();
+		}
 	}
 }

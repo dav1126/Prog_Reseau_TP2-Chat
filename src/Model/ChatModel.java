@@ -15,18 +15,40 @@ public class ChatModel
 	
 	private ObservableList<String> chatMessagesList = null;
 	
-	private ObservableList<String> availableForChatIpAddressList = null;
-	
-	private ObservableList<String> availableNetworkInterfacesNamesList = null;
+	private ObservableList<String> availableForChatUsersList = null;
 	
 	private Map<String, String> userAvailableToChatMap = null;
 	
+	private boolean connectionEstablished = false;
+	
+	private String remoteUserIpAddress = null;
+
 	private ChatModel()
 	{
 		statusMessagesList = FXCollections.observableArrayList();
 		chatMessagesList =FXCollections.observableArrayList();
-		availableForChatIpAddressList = FXCollections.observableArrayList();
+		availableForChatUsersList = FXCollections.observableArrayList();
 		userAvailableToChatMap = new HashMap<>();
+	}
+	
+	public boolean isConnectionEstablished()
+	{
+		return connectionEstablished;
+	}
+	
+	public void setConnectionEstablished(boolean connectionEstablished)
+	{
+		this.connectionEstablished = connectionEstablished;
+	}
+	
+	public String getRemoteUserIpAddress()
+	{
+		return remoteUserIpAddress;
+	}
+
+	public void setRemoteUserIpAddress(String remoteUserIpAddress)
+	{
+		this.remoteUserIpAddress = remoteUserIpAddress;
 	}
 	
 	public ObservableList<String> getChatMessagesList()
@@ -39,14 +61,9 @@ public class ChatModel
 		return statusMessagesList;
 	}
 	
-	public ObservableList<String> getAvailableForChatIpAddressList()
+	public ObservableList<String> getAvailableForChatUsersList()
 	{
-		return availableForChatIpAddressList;
-	}
-	
-	public ObservableList<String> getAvailableNetworkInterfacesNames()
-	{
-		return availableNetworkInterfacesNamesList;
+		return availableForChatUsersList;
 	}
 	
 	public Map<String, String> getUserAvailableToChatMap()

@@ -27,14 +27,14 @@
       <HBox layoutX="13.0" layoutY="304.0" prefHeight="30.0" prefWidth="467.0" spacing="20.0">
          <children>
             <Label text="Fichier:" />
-            <TextField fx:id="textFieldFichier" prefHeight="25.0" prefWidth="242.0" />
-            <Button fx:id="buttonChoisirFichier" mnemonicParsing="false" onAction="#choisirFichier" prefHeight="25.0" prefWidth="97.0" text="Choisir" />
+            <TextField fx:id="textFieldFichier" disable="true" prefHeight="25.0" prefWidth="242.0" />
+            <Button fx:id="buttonChoisirFichier" disable="true" mnemonicParsing="false" onAction="#choisirFichier" prefHeight="25.0" prefWidth="97.0" text="Choisir" />
          </children>
       </HBox>
       <Button fx:id="Quitter" layoutX="782.0" layoutY="340.0" mnemonicParsing="false" onAction="#quitter" text="Quitter" />
       <HBox layoutX="16.0" layoutY="258.0" prefHeight="46.0" prefWidth="467.0" spacing="20.0">
          <children>
-            <TextField fx:id="textFieldMessageSaisie" prefHeight="25.0" prefWidth="381.0" />
+            <TextField fx:id="textFieldMessageSaisie" disable="true" prefHeight="25.0" prefWidth="381.0" />
             <Button fx:id="buttonEnvoyerMsg" disable="true" mnemonicParsing="false" onAction="#envoyerMessage" prefHeight="25.0" prefWidth="120.0" text="Envoyer msg">
                <HBox.margin>
                   <Insets />
@@ -46,7 +46,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="138.0" prefWidth="286.0">
                <children>
-                  <ListView fx:id="listViewConversation" layoutX="46.0" layoutY="3.0" prefHeight="175.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="listViewConversation" disable="true" layoutX="46.0" layoutY="3.0" prefHeight="175.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">

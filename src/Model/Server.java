@@ -17,6 +17,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
@@ -26,33 +27,43 @@ public class Server
 	DatagramSocket UDPSocket;
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
-	boolean connectionEstablished = false;
 	private static final int MAX_TRANSMISSION_BYTE_SIZE = 10000000;
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
-			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(* ALPHA";
+			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(*ALPHA";
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
 	private static final int UDP_SOCKET_NUMBER = 5556;
 	private static final int SERVER_SOCKET_NUMBER = 5555;
 	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
 			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
-	
+	private static final String CHAT_REQUEST_CODE = 
+			"Yhwa6WY6ywiob8W*0!90aw9898awWAJm(7(";
+	private BooleanProperty chatRequestedBooleanProperty = new SimpleBooleanProperty();
+	private String chatRequestApplicantUsername;
+	private String chatRequestApplicantIp;
+	Thread receiveMessageThread;
+
+	private boolean chatRequestAccepted =  false;
+
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
 	 * connection with a client
 	 */
-	private void openServerSockets()
+	public void openServerSockets()
 	{
-		try
+		Thread thread =  new Thread(() ->
 		{
-			serverSocket = new ServerSocket(SERVER_SOCKET_NUMBER);
-			clientSocket = serverSocket.accept();
-			connectionEstablished = true;
-		} 
-		catch (IOException e)
-		{
-			System.out.println("Could not open server's sockets");
-			e.printStackTrace();
-		}
+			try
+			{
+				serverSocket = new ServerSocket(SERVER_SOCKET_NUMBER);
+				clientSocket = serverSocket.accept();
+			} 
+			catch (IOException e)
+			{
+				System.out.println("Could not open server's sockets");
+				e.printStackTrace();
+			}
+		});
+		thread.start();
 	}
 	
 	/**
@@ -63,7 +74,7 @@ public class Server
 	 * wait for a normal message.
 	 * @return message that came through the channel
 	 */
-	private synchronized String receiveMessage()
+	private synchronized void receiveMessage()
 	{
 		String msgInput = null;
 		if(serverSocket != null && clientSocket != null)
@@ -99,6 +110,39 @@ public class Server
 					//Receive the file
 					startReceiveFile();
 				}
+				
+				//If the received message is the start chat request code
+				else if (msgInput.contains(CHAT_REQUEST_CODE))
+				{
+					chatRequestApplicantUsername = msgInput.substring(CHAT_REQUEST_CODE.length());
+					chatRequestApplicantIp = clientSocket.getInetAddress().getHostAddress();
+					System.out.println("Server detected a chat request from :" + chatRequestApplicantUsername + "  " + chatRequestApplicantIp);
+					
+					//This boolean property change triggers a listener that pops an alert asking the user to 
+					//accept or refuse the chat request (see in ControllerFXMLApplication class).
+					//The use choice changes the chatRequestAccepted attribute
+					chatRequestedBooleanProperty.setValue(true);
+					
+					//Make this thread wait for an answer from the user
+					try
+					{
+						receiveMessageThread.wait();
+					} catch (InterruptedException e)
+					{
+						System.out.println("Server receive mesage thread wait error.");
+						e.printStackTrace();
+					}
+					
+					//Prepare the answer to the request base on the choice of the user
+					String answer = "no";
+					if (chatRequestAccepted)
+						answer = "yes";
+					
+					//Send the answer back to the request applicant
+					OutputStream bOStream = clientSocket.getOutputStream();
+					bOStream.write(answer.getBytes());
+					bOStream.flush();
+				}
 			}
 			catch (IOException e)
 			{
@@ -110,7 +154,19 @@ public class Server
 		{
 			System.out.println("Could not receive message: server's sockets are null");
 		}
-		return msgInput;
+	}
+	
+	public void startReceiveMessage()
+	{
+		receiveMessageThread =  new Thread(() ->
+		{
+			//Keep waiting for new messages
+			while (true)
+			{
+				receiveMessage();
+			}
+		});
+		receiveMessageThread.start();
 	}
 	
 	private void startReceiveFile()
@@ -232,8 +288,6 @@ public class Server
 			{
 				UDPSocket = new DatagramSocket(UDP_SOCKET_NUMBER);
 				UDPSocket.setBroadcast(true);
-				ChatModel.getInstance().getStatusMessagesList().add(
-						"Server UDP socket openend");
 			} 
 			catch (SocketException e)
 			{
@@ -291,7 +345,7 @@ public class Server
 					//If the broadcast message is from a remote client
 					if (!remoteIpAddress.equals(lanIPAddress))
 					{
-						//Send a positibe response to the remote client
+						//Send a positive response to the remote client
 						byte[] bufferResponse = username.getBytes();
 						DatagramPacket responsePacket = new DatagramPacket
 								(bufferResponse, bufferResponse.length, 
@@ -324,6 +378,9 @@ public class Server
 		});
 		
 		thread.start();
+		Platform.runLater(() -> ChatModel.getInstance().
+				getStatusMessagesList().add
+				("Server detecting online users each 2 sec..."));
 	}
 	
 	/**
@@ -411,5 +468,41 @@ public class Server
 			    }
 			}
 		return lanAddress;
+	}
+	
+	public BooleanProperty getChatRequestedBooleanProperty()
+	{
+		return chatRequestedBooleanProperty;
+	}
+
+	public void setChatRequestedBooleanProperty(
+			BooleanProperty chatRequestedBooleanProperty)
+	{
+		this.chatRequestedBooleanProperty = chatRequestedBooleanProperty;
+	}
+	
+	public String getChatRequestApplicantUsername()
+	{
+		return chatRequestApplicantUsername;
+	}
+	
+	public String getChatRequestApplicantIp()
+	{
+		return chatRequestApplicantIp;
+	}
+	
+	public boolean isChatRequestAccepted()
+	{
+		return chatRequestAccepted;
+	}
+
+	public void setChatRequestAccepted(boolean chatRequestAccepted)
+	{
+		this.chatRequestAccepted = chatRequestAccepted;
+	}
+	
+	public Thread getReceiveMessageThread()
+	{
+		return receiveMessageThread;
 	}
 }

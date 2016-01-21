@@ -2,6 +2,9 @@ package Control;
 
 import Control.ControllerFXMLapplication;
 import javafx.application.Application;
+import javafx.beans.binding.When;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -21,7 +24,7 @@ public static void main(String[] args) {
 	{
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("../View/FXMLapplication.fxml"));
 		AnchorPane root = (AnchorPane) loader.load();
-		ControllerFXMLapplication mainViewController = (ControllerFXMLapplication)loader.getController();
+		//ControllerFXMLapplication mainViewController = (ControllerFXMLapplication)loader.getController();
 		
 		Scene scene = new Scene(root);
 		pStage.setScene(scene);
