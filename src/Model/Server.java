@@ -44,7 +44,7 @@ public class Server
 
 	private boolean chatRequestAccepted =  false;
 	
-	ChatModel chatModel = ChatModel.getInstance();
+	private ChatModel chatModel = ChatModel.getInstance();
 
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -108,6 +108,18 @@ public class Server
 				
 				//Receive the file
 				startReceiveFile();
+				//Make this thread wait for the file reception to be over
+				synchronized (receiveMessageThreadLock)
+				{
+					try
+					{
+						receiveMessageThreadLock.wait();
+					} catch (InterruptedException e)
+					{
+						System.out.println("Server receive mesage thread wait error.");
+						e.printStackTrace();
+					}
+				}
 			}
 			
 			//If the received message is the start chat request code
@@ -144,6 +156,7 @@ public class Server
 				OutputStream bOStream = clientSocket.getOutputStream();
 				bOStream.write(answer.getBytes());
 				bOStream.flush();
+				chatModel.setConnectionEstablished(true);
 			}
 			//else, it means that it is a normal chat message
 			else
@@ -188,6 +201,7 @@ public class Server
 					Platform.runLater(() -> ChatModel.getInstance().
 							getStatusMessagesList().add
 							("Chat ended: remote user disconnected."));
+					chatModel.setConnectionEstablished(false);
 				}
 				else
 				{
@@ -217,6 +231,12 @@ public class Server
 			}
 				String fileName = receiveFileName();
 				receiveFile(fileName);
+				
+			//Notify the message thread that the file reception is done
+			synchronized (receiveMessageThreadLock)
+			{
+					receiveMessageThreadLock.notify();
+			}
 		});
 		thread.start();
 	}
@@ -269,9 +289,11 @@ public class Server
 		{
 			//Get the file
 			InputStream bIStream = clientSocket.getInputStream();
+			File filePath = new File(PATH_TO_FILE_DIRECTORY);
+			filePath.mkdirs();
 			File file = new File(PATH_TO_FILE_DIRECTORY, fileName);
+			
 			file.createNewFile();
-			file.mkdirs();
 			fos = new FileOutputStream(file);
 			
 			
@@ -285,7 +307,7 @@ public class Server
 			
 			System.out.println("File received: " + file.getName());
 			Platform.runLater(() -> 
-			chatModel.getStatusMessagesList().add("File received: fileName"));
+			chatModel.getStatusMessagesList().add("File received: " + fileName));
 			
 			//Confirm the reception of the file to the client
 			OutputStream bOStream = clientSocket.getOutputStream();

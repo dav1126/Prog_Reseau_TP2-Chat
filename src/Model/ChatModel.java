@@ -4,6 +4,8 @@ package Model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -19,12 +21,13 @@ public class ChatModel
 	
 	private Map<String, String> userAvailableToChatMap = null;
 	
-	private boolean connectionEstablished = false;
+	private BooleanProperty connectionEstablished;
 	
 	private String remoteUserIpAddress = null;
 
 	private ChatModel()
 	{
+		connectionEstablished = new SimpleBooleanProperty(false);
 		statusMessagesList = FXCollections.observableArrayList();
 		chatMessagesList =FXCollections.observableArrayList();
 		availableForChatUsersList = FXCollections.observableArrayList();
@@ -33,12 +36,17 @@ public class ChatModel
 	
 	public boolean isConnectionEstablished()
 	{
-		return connectionEstablished;
+		return connectionEstablished.get();
+	}
+	
+	public BooleanProperty getConnectionEstablishedProperty()
+	{
+		return this.connectionEstablished;
 	}
 	
 	public void setConnectionEstablished(boolean connectionEstablished)
 	{
-		this.connectionEstablished = connectionEstablished;
+		this.connectionEstablished.set(connectionEstablished);
 	}
 	
 	public String getRemoteUserIpAddress()

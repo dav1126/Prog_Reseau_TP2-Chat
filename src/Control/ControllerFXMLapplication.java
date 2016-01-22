@@ -41,6 +41,9 @@ public class ControllerFXMLapplication implements Initializable{
 	Server server;
 	ChatModel chatModel;
 	
+	 @FXML
+	    private Button deconnecterButton;
+	
     @FXML
     private TextField textFieldNomUtilisateur;
 
@@ -81,6 +84,11 @@ public class ControllerFXMLapplication implements Initializable{
     private Label reseauLocalLabel;
 
     @FXML
+    void deconnecter(ActionEvent event) {
+
+    }
+    
+    @FXML
     void choisirFichier() 
     {
     	FileChooser fileChooser = new FileChooser();
@@ -116,27 +124,27 @@ public class ControllerFXMLapplication implements Initializable{
     	client.openClientSocket(remoteUserIp);
     	client.sendChatRequest(textFieldNomUtilisateur.getText());
     	
-    	synchronized (client.getControllerThreadLock())
-		{
-			try
-			{
-				client.getControllerThreadLock().wait();
-			} catch (InterruptedException e)
-			{
-				System.out.println("controllerThreadLock interrupted");
-				e.printStackTrace();
-			}
-		}
-    	
-    	if (client.isChatRequestAccepted())
-    	{
-    		enableChat();
-    		//client.stopLookingForOnlineUsers();
-    	}
-    	else
-    	{
-    		client.closeClientSocket();
-    	}
+//    	synchronized (client.getControllerThreadLock())
+//		{
+//			try
+//			{
+//				client.getControllerThreadLock().wait();
+//			} catch (InterruptedException e)
+//			{
+//				System.out.println("controllerThreadLock interrupted");
+//				e.printStackTrace();
+//			}
+//		}
+//    	
+//    	if (!client.isChatRequestAccepted())
+//    	{
+//    		enableChat();
+//    		//client.stopLookingForOnlineUsers();
+//    	}
+//    	else
+//    	{
+//    		client.closeClientSocket();
+//    	}
     }
 
     private void enableChat()
@@ -213,6 +221,9 @@ public class ControllerFXMLapplication implements Initializable{
 	    	
 	    	//Set a listener on the textFieldFichier
 	    	setButtonEnvoyerFichierBinds();
+	    	
+	    	//Set a listener on the ChatModel's connectionEstablished property
+	    	setConnectionEstablishedListener();
     	}
     	else
     	{
@@ -388,8 +399,33 @@ public class ControllerFXMLapplication implements Initializable{
 			}
 		}); 	
     }
-
     
+    public void setConnectionEstablishedListener()
+    {
+    	chatModel.getConnectionEstablishedProperty().addListener(new ChangeListener<Object>()
+    	{
+			@Override
+			public void changed(ObservableValue<? extends Object> observable,
+					Object oldValue, Object newValue)
+			{
+				if (chatModel.isConnectionEstablished())
+				{
+					enableChat();
+					//Enable the deconnexion button
+				}
+				else
+				{
+					disableChat();
+					//Disable the deconnexion button
+					
+				}			
+			}
+    		
+    	});
+    	
+    }
+
+ //******************************************************************METTRE LA LISTVIEW DES USER CONNECTÉ A JOUR***************   
     /**
      * Ask the user to enter a username
      * @return true if the user entered a username

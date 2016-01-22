@@ -604,19 +604,15 @@ public class Client
 							chatRequestAccepted = true;
 							Platform.runLater(() ->
 							chatModel.getStatusMessagesList().add("Chat resquest accepted by remote user."));
+							chatModel.setConnectionEstablished(true);
 						}
 						else
 						{
 							chatRequestAccepted = false;
 							Platform.runLater(() ->
 							chatModel.getStatusMessagesList().add("Chat resquest refused by remote user."));
+							closeClientSocket();
 						}	
-						
-						//Wake the controller thread, that is waiting for the remoteuser answer
-						synchronized (controllerThreadLock)
-						{
-							controllerThreadLock.notify();
-						}
 			        }
 			        catch (IOException e)
 			        {
@@ -641,11 +637,7 @@ public class Client
 			System.out.println("Remote user didn't answer to the chat request");
 			Platform.runLater(() ->
 			chatModel.getStatusMessagesList().add("No answer from remote user."));
-			//Wake the controller thread, that is waiting for the remoteuser answer
-			synchronized (controllerThreadLock)
-			{
-				controllerThreadLock.notify();
-			}
+			closeClientSocket();
 		}
 		catch (final ExecutionException e) 
 		{
