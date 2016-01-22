@@ -187,68 +187,132 @@ public class ControllerFXMLapplication implements Initializable{
 	    	});
 	    	
 	    	//Set a listener to the server's chatRequestedProperty to pop an alert when it is changed to true
-	    	server.getChatRequestedBooleanProperty().addListener(new ChangeListener<Object>() 
-	    	{
-	    	    @Override
-	    	    public void changed(ObservableValue<?> observable, Object oldValue, Object newValue) 
-	    	    {
-	    	        if (server.getChatRequestedBooleanProperty().getValue())
-	    	        {
-	    	        	//Set the chatRequested property back to false
-	    	        	server.getChatRequestedBooleanProperty().setValue(false);
-	    	        	
-	    	        	//Pop an alert asking this server's user if he wants to accept the chat request
-	    	        	Platform.runLater(new Runnable()
-	    	        	{
-	    	        		@Override
-	    	        		public void run()
-	    	        		{	    	        		
-		    	        		Alert alert = new Alert(AlertType.INFORMATION);
-			    	        	alert.setTitle("Chat request");
-			    	        	alert.setHeaderText(null);
-			    	        	alert.setContentText(server.getChatRequestApplicantUsername() + " veux chatter avec vous!\n Vous avez 10 secondes pour répondre...");
-		
-			    	        	ButtonType buttonTypeAccepter = new ButtonType("Accepter");
-			    	        	ButtonType buttonTypeRefuser = new ButtonType("Refuser");
-			    	        	
-			    	        	alert.getButtonTypes().setAll(buttonTypeAccepter, buttonTypeRefuser);
-			    	        	
-			    	        	Timeline idlestage = new Timeline( new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>()
-			    	        		    {
-		
-			    	        		        @Override
-			    	        		        public void handle( ActionEvent event )
-			    	        		        {
-			    	        		            alert.setResult(buttonTypeRefuser);
-			    	        		            alert.close();
-			    	        		        }
-			    	        		    } ) );
-			        		    idlestage.setCycleCount( 1 );
-			        		    idlestage.play();
-			        		    Optional <ButtonType> choix = alert.showAndWait();
-			        		    
-			        		    if (choix.get() == buttonTypeAccepter)
-			        		    {
-			        		        client.openClientSocket(server.getChatRequestApplicantIp());
-			        		        server.setChatRequestAccepted(true);
-			        		        enableChat();
-			        		    }
-			        		    else
-			        		    	server.setChatRequestAccepted(false);
-			        		    synchronized (server.getReceiveMessageThreadLock())
-			    				{
-			        		    	server.getReceiveMessageThreadLock().notify();
-			    				}
-	    	        		}
-	    	        	});
-	    	        }
-	    	    }
-	    	});
+	    	setChatRequestAlert();
+	    	
+	    	//Set a listener on the textFieldMessageSaisie that binds it to the buttonEnvoyerFichier
+	    	setButtonEnvoyerMessageBinds();
     	}
     	else
     	{
     		System.exit(0);
     	} 	
+    }
+    
+    /**
+     * Set a listener on the server's chatRequestedProperty to pop an alert when it is changed to true
+     */
+    private void setChatRequestAlert()
+    {
+    	//Set a listener to the server's chatRequestedProperty to pop an alert when it is changed to true
+    	server.getChatRequestedBooleanProperty().addListener(new ChangeListener<Object>() 
+    	{
+    	    @Override
+    	    public void changed(ObservableValue<?> observable, Object oldValue, Object newValue) 
+    	    {
+    	        if (server.getChatRequestedBooleanProperty().getValue())
+    	        {
+    	        	//Set the chatRequested property back to false
+    	        	server.getChatRequestedBooleanProperty().setValue(false);
+    	        	
+    	        	//Pop an alert asking this server's user if he wants to accept the chat request
+    	        	Platform.runLater(new Runnable()
+    	        	{
+    	        		@Override
+    	        		public void run()
+    	        		{	    	        		
+	    	        		Alert alert = new Alert(AlertType.INFORMATION);
+		    	        	alert.setTitle("Chat request");
+		    	        	alert.setHeaderText(null);
+		    	        	alert.setContentText(server.getChatRequestApplicantUsername() + " veux chatter avec vous!\n Vous avez 10 secondes pour répondre...");
+	
+		    	        	ButtonType buttonTypeAccepter = new ButtonType("Accepter");
+		    	        	ButtonType buttonTypeRefuser = new ButtonType("Refuser");
+		    	        	
+		    	        	alert.getButtonTypes().setAll(buttonTypeAccepter, buttonTypeRefuser);
+		    	        	
+		    	        	Timeline idlestage = new Timeline( new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>()
+		    	        		    {
+	
+		    	        		        @Override
+		    	        		        public void handle( ActionEvent event )
+		    	        		        {
+		    	        		            alert.setResult(buttonTypeRefuser);
+		    	        		            alert.close();
+		    	        		        }
+		    	        		    } ) );
+		        		    idlestage.setCycleCount( 1 );
+		        		    idlestage.play();
+		        		    Optional <ButtonType> choix = alert.showAndWait();
+		        		    
+		        		    if (choix.get() == buttonTypeAccepter)
+		        		    {
+		        		        client.openClientSocket(server.getChatRequestApplicantIp());
+		        		        server.setChatRequestAccepted(true);
+		        		        enableChat();
+		        		    }
+		        		    else
+		        		    	server.setChatRequestAccepted(false);
+		        		    synchronized (server.getReceiveMessageThreadLock())
+		    				{
+		        		    	server.getReceiveMessageThreadLock().notify();
+		    				}
+    	        		}
+    	        	});
+    	        }
+    	    }
+    	});
+    }
+    
+    /**
+     * Set the listeners used to manage the buttonEnvoyerMessage's disable property
+     */
+    public void setButtonEnvoyerMessageBinds()
+    {
+    	//When the textFieldMessage's text is changed
+    	textFieldMessageSaisie.textProperty().addListener(new ChangeListener<String>()
+    			{
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable,
+					String oldValue, String newValue)
+			{		
+				//If the textfield is empty or disabled
+				if (textFieldMessageSaisie.getText() == null || textFieldMessageSaisie.getText().trim().isEmpty())
+				{
+					//Disable the buttonEnvoyer
+					buttonEnvoyerMsg.setDisable(true);
+				}
+				else
+				{
+					buttonEnvoyerMsg.setDisable(true);
+				}
+			}
+    	});
+			
+		//When the textFieldMessage is disabled
+		textFieldMessageSaisie.disabledProperty().addListener(new ChangeListener<Boolean>()
+			{
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable,
+					Boolean oldValue, Boolean newValue)
+			{						
+					if (textFieldMessageSaisie.isDisabled())
+					{
+						//Disable the buttonEnvoyer
+						buttonEnvoyerMsg.setDisable(true);		
+					}
+					else
+					{
+						//If the textfield is not empty
+						if (textFieldMessageSaisie.getText() != null && !textFieldMessageSaisie.getText().trim().isEmpty())
+						{
+							//Disable the buttonEnvoyer
+							buttonEnvoyerMsg.setDisable(false);
+						}
+					}
+			}
+		}); 	
     }
     
     /**
