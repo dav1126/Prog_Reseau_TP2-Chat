@@ -199,6 +199,8 @@ public class ControllerFXMLapplication implements Initializable{
 			    	        	ButtonType buttonTypeAccepter = new ButtonType("Accepter");
 			    	        	ButtonType buttonTypeRefuser = new ButtonType("Refuser");
 			    	        	
+			    	        	alert.getButtonTypes().setAll(buttonTypeAccepter, buttonTypeRefuser);
+			    	        	
 			    	        	Timeline idlestage = new Timeline( new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>()
 			    	        		    {
 		
@@ -217,6 +219,7 @@ public class ControllerFXMLapplication implements Initializable{
 			        		    {
 			        		        client.openClientSocket(server.getChatRequestApplicantIp());
 			        		        server.setChatRequestAccepted(true);
+			        		        enableChat();
 			        		    }
 			        		    else
 			        		    	server.setChatRequestAccepted(false);
