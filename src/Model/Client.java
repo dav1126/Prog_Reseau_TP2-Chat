@@ -44,6 +44,11 @@ public class Client
 	private boolean chatRequestAccepted = false;
 	private Thread sendChatRequestThread;
 	private ChatModel chatModel = ChatModel.getInstance();
+	/**
+	 * A lock object to make the controller wait for an answer from the remote user
+	 * when a chat request is sent
+	 */
+	Object controllerThreadLock = new Object();
 	
 	/**
 	 * Objet servant a locker la liste observable de Ip atteignable
@@ -553,16 +558,6 @@ public class Client
 				//Get an answer in another thread
 				getAnswerToChatRequest();
 				
-				//Make this thread wait for an answer before to continue
-				try
-				{
-					sendChatRequestThread.wait();
-				} catch (Exception e)
-				{
-					System.out.println("Chat request thread wait error");
-					e.printStackTrace();
-				}
-				
 			} catch (IOException e)
 			{
 				System.out.println("Chat request could not be sent");
@@ -611,10 +606,13 @@ public class Client
 							chatRequestAccepted = false;
 							Platform.runLater(() ->
 							chatModel.getStatusMessagesList().add("Chat resquest refused by remote user."));
-						}
+						}	
 						
-						//If the remote user answered, notify the waiting sendChatRequestThread
-						sendChatRequestThread.notify();
+						//Wake the controller thread, that is waiting for the remoteuser answer
+						synchronized (controllerThreadLock)
+						{
+							controllerThreadLock.notify();
+						}
 			        }
 			        catch (IOException e)
 			        {
@@ -636,12 +634,14 @@ public class Client
 		catch (final TimeoutException e) 
 		{
 		    // Took too long!
-			//Notify the waiting sendChatRequestThread
 			System.out.println("Remote user didn't answer to the chat request");
 			Platform.runLater(() ->
 			chatModel.getStatusMessagesList().add("No answer from remote user."));
-			sendChatRequestThread.notify();
-			
+			//Wake the controller thread, that is waiting for the remoteuser answer
+			synchronized (controllerThreadLock)
+			{
+				controllerThreadLock.notify();
+			}
 		}
 		catch (final ExecutionException e) 
 		{
@@ -651,5 +651,10 @@ public class Client
 		finally {
 		    service.shutdown();
 		}
+	}
+	
+	public Object getControllerThreadLock()
+	{
+		return controllerThreadLock;
 	}
 }

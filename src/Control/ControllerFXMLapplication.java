@@ -100,6 +100,18 @@ public class ControllerFXMLapplication implements Initializable{
     	client.openClientSocket(remoteUserIp);
     	client.sendChatRequest(textFieldNomUtilisateur.getText());
     	
+    	synchronized (client.getControllerThreadLock())
+		{
+			try
+			{
+				client.getControllerThreadLock().wait();
+			} catch (InterruptedException e)
+			{
+				System.out.println("controllerThreadLock interrupted");
+				e.printStackTrace();
+			}
+		}
+    	
     	if (client.isChatRequestAccepted())
     	{
     		enableChat();

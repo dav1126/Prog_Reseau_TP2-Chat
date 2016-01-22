@@ -40,7 +40,6 @@ public class Server
 	private BooleanProperty chatRequestedBooleanProperty = new SimpleBooleanProperty();
 	private String chatRequestApplicantUsername;
 	private String chatRequestApplicantIp;
-	Thread receiveMessageThread;
 	Object receiveMessageThreadLock = new Object();
 
 	private boolean chatRequestAccepted =  false;
@@ -158,7 +157,7 @@ public class Server
 	 */
 	public void startReceiveMessageThread()
 	{
-		receiveMessageThread =  new Thread(() ->
+		Thread thread =  new Thread(() ->
 		{
 			//Keep waiting for new messages
 			while (true)
@@ -178,7 +177,7 @@ public class Server
 				receiveMessage();
 			}
 		});
-		receiveMessageThread.start();
+		thread.start();
 	}
 	
 	private void startReceiveFile()
@@ -498,11 +497,6 @@ public class Server
 	public void setChatRequestAccepted(boolean chatRequestAccepted)
 	{
 		this.chatRequestAccepted = chatRequestAccepted;
-	}
-	
-	public Thread getReceiveMessageThread()
-	{
-		return receiveMessageThread;
 	}
 	
 	public Object getReceiveMessageThreadLock()
