@@ -108,6 +108,7 @@ public class Client
 			{
 				OutputStream output = clientSocket.getOutputStream();
 				output.write(message.getBytes());
+				Platform.runLater(() -> chatModel.getChatMessagesList().add(message)); 
 			} catch (IOException e)
 			{
 				System.out.println("Message could not be sent");
@@ -178,7 +179,9 @@ public class Client
 				{
 					sendFileTransmissionAlert();
 					sendFileName(fileToSend);
-					sendFile(fileToSend);	
+					sendFile(fileToSend);
+					Platform.runLater(() -> 
+					chatModel.getStatusMessagesList().add("The file has been sent"));
 				} 
 				catch (IOException e)
 				{

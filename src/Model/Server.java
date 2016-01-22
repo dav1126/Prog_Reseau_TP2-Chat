@@ -76,11 +76,10 @@ public class Server
 	 * wait for a normal message.
 	 * @return message that came through the channel
 	 */
-	private synchronized void receiveMessage()
+	private synchronized void receiveMessage() throws IOException
 	{
 		String msgInput = null;
-		try
-		{
+		
 			InputStream bIStream = clientSocket.getInputStream();
 			
 			byte[] byteBuffer = new byte[MAX_TRANSMISSION_BYTE_SIZE];
@@ -151,13 +150,7 @@ public class Server
 			{	
 				final String chatMessage = msgInput;//final variable necessary to add to the ChatMessagesList
 				Platform.runLater(() -> chatModel.getChatMessagesList().add(chatMessage)); 
-			}
-		}
-		catch (IOException e)
-		{
-			System.out.println("Could not receive message.");
-			e.printStackTrace();
-		}
+			}	
 	}
 	/**
 	 * Creates and start a thread that wait for a message to come through the 
@@ -168,21 +161,38 @@ public class Server
 		Thread thread =  new Thread(() ->
 		{
 			//Keep waiting for new messages
-			while (true)
+			try
 			{
-				while (serverSocket == null || clientSocket == null)
+				while (true)
 				{
-					try
+					while (serverSocket == null || clientSocket == null)
 					{
-						Thread.sleep(10);
-					} 
-					catch (Exception e)
-					{
-						System.out.println("Server receive file thread sleep error");
-						e.printStackTrace();
+						
+						try
+						{
+							Thread.sleep(10);
+						} catch (Exception e)
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}				
 					}
+					receiveMessage();
 				}
-				receiveMessage();
+			}
+			catch (IOException e)
+			{
+				if (e instanceof SocketException)
+				{
+					clientSocket = null;
+					Platform.runLater(() -> ChatModel.getInstance().
+							getStatusMessagesList().add
+							("Chat ended: remote user disconnected."));
+				}
+				else
+				{
+					e.printStackTrace();
+				}
 			}
 		});
 		thread.start();
@@ -274,6 +284,8 @@ public class Server
 				}
 			
 			System.out.println("File received: " + file.getName());
+			Platform.runLater(() -> 
+			chatModel.getStatusMessagesList().add("File received: fileName"));
 			
 			//Confirm the reception of the file to the client
 			OutputStream bOStream = clientSocket.getOutputStream();

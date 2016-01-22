@@ -1,6 +1,9 @@
 package Control;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -28,6 +31,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class ControllerFXMLapplication implements Initializable{
@@ -76,8 +81,17 @@ public class ControllerFXMLapplication implements Initializable{
     private Label reseauLocalLabel;
 
     @FXML
-    void choisirFichier(ActionEvent event) {
-
+    void choisirFichier() 
+    {
+    	FileChooser fileChooser = new FileChooser();
+		
+		fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+		File fichier = fileChooser.showOpenDialog(new Stage());
+		
+		if (fichier != null)
+		{
+			textFieldFichier.setText(fichier.getPath());
+		}	
     }
 
     @FXML
@@ -171,6 +185,9 @@ public class ControllerFXMLapplication implements Initializable{
 	    	//Set the app messages listview
 	    	listViewInfo.setItems(chatModel.getStatusMessagesList());
 	    	
+	    	//Set the chat messages listview
+	    	listViewConversation.setItems(chatModel.getChatMessagesList());
+	    	
 	    	//Set the available user listview
 	    	usagersDisponiblesListView.setItems(chatModel.getAvailableForChatUsersList());
 	    	client.getRemoteUserAvailableForChat();
@@ -193,6 +210,9 @@ public class ControllerFXMLapplication implements Initializable{
 	    	
 	    	//Set a listener on the textFieldMessageSaisie that binds it to the buttonEnvoyerFichier
 	    	setButtonEnvoyerMessageBinds();
+	    	
+	    	//Set a listener on the textFieldFichier
+	    	setButtonEnvoyerFichierBinds();
     	}
     	else
     	{
@@ -278,7 +298,7 @@ public class ControllerFXMLapplication implements Initializable{
 			public void changed(ObservableValue<? extends String> observable,
 					String oldValue, String newValue)
 			{		
-				//If the textfield is empty or disabled
+				//If the textfield is empty
 				if (textFieldMessageSaisie.getText() == null || textFieldMessageSaisie.getText().trim().isEmpty())
 				{
 					//Disable the buttonEnvoyer
@@ -316,6 +336,59 @@ public class ControllerFXMLapplication implements Initializable{
 			}
 		}); 	
     }
+    
+    /**
+     * Set the listeners used to manage the buttonEnvoyerFichier's disable property
+     */
+    public void setButtonEnvoyerFichierBinds()
+    {
+    	//When the textFieldFichier's text is changed
+    	textFieldFichier.textProperty().addListener(new ChangeListener<String>()
+    			{
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable,
+					String oldValue, String newValue)
+			{		
+				//If the textfield is empty 
+				if (textFieldFichier.getText() == null || textFieldFichier.getText().trim().isEmpty())
+				{
+					//Disable the buttonEnvoyer
+					buttonEnvoyerFichier.setDisable(true);
+				}
+				else
+				{
+					buttonEnvoyerFichier.setDisable(false);
+				}
+			}
+    	});
+			
+		//When the textFieldFichier is disabled
+		textFieldFichier.disabledProperty().addListener(new ChangeListener<Boolean>()
+			{
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable,
+					Boolean oldValue, Boolean newValue)
+			{						
+					if (textFieldFichier.isDisabled())
+					{
+						//Disable the buttonEnvoyer
+						buttonEnvoyerFichier.setDisable(true);		
+					}
+					else
+					{
+						//If the textfield is not empty
+						if (textFieldFichier.getText() != null && !textFieldFichier.getText().trim().isEmpty())
+						{
+							//Disable the buttonEnvoyer
+							buttonEnvoyerFichier.setDisable(false);
+						}
+					}
+			}
+		}); 	
+    }
+
     
     /**
      * Ask the user to enter a username
