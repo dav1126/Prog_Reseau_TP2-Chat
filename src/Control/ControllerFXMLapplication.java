@@ -286,7 +286,7 @@ public class ControllerFXMLapplication implements Initializable{
 				}
 				else
 				{
-					buttonEnvoyerMsg.setDisable(true);
+					buttonEnvoyerMsg.setDisable(false);
 				}
 			}
     	});

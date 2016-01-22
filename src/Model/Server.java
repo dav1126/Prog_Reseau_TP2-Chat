@@ -43,6 +43,8 @@ public class Server
 	Object receiveMessageThreadLock = new Object();
 
 	private boolean chatRequestAccepted =  false;
+	
+	ChatModel chatModel = ChatModel.getInstance();
 
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -143,6 +145,12 @@ public class Server
 				OutputStream bOStream = clientSocket.getOutputStream();
 				bOStream.write(answer.getBytes());
 				bOStream.flush();
+			}
+			//else, it means that it is a normal chat message
+			else
+			{	
+				final String chatMessage = msgInput;//final variable necessary to add to the ChatMessagesList
+				Platform.runLater(() -> chatModel.getChatMessagesList().add(chatMessage)); 
 			}
 		}
 		catch (IOException e)
