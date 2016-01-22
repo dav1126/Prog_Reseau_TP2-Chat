@@ -81,13 +81,15 @@ public class ControllerFXMLapplication implements Initializable{
     }
 
     @FXML
-    void envoyerFichier(ActionEvent event) {
-    	
+    void envoyerFichier() 
+    {
+    	client.startSendFile(textFieldFichier.getText());
     }
 
     @FXML
-    void envoyerMessage(ActionEvent event) {
-
+    void envoyerMessage() 
+    {
+    	client.sendMessage(textFieldMessageSaisie.getText());
     }
 
     @FXML

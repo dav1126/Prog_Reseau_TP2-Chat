@@ -154,8 +154,9 @@ public class Client
 	 * Calls the appropriate functions to send a file to the server
 	 * @param fileToSend 
 	 */
-	public void startSendFile(File fileToSend)
+	public void startSendFile(String fileToSendPath)
 	{
+		File fileToSend = new File(fileToSendPath);
 		if (fileToSend.length() <= MAX_TRANSMISSION_BYTE_SIZE)
 		{
 			Thread thread =  new Thread(() ->
