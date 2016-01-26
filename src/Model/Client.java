@@ -398,42 +398,6 @@ public class Client
 					}
 				}
 				
-				//Check if the users in the list are still online
-				//For each user in the list
-				for (String username: chatModel.getAvailableForChatUsersList())
-				{
-					//Get the ip address of the user, from the map
-					InetAddress onlineCheckUserAddress = null;
-					try
-					{
-						onlineCheckUserAddress = InetAddress.getByName
-								(chatModel.getUserAvailableToChatMap().get(username));
-					} catch (Exception e1)
-					{
-						e1.printStackTrace();
-					}
-					
-					//Send a packet to the remote user to see if he is still online
-					byte[] bufferOnlineCheck = new byte[1];
-					DatagramPacket onlineCheckPacket = new DatagramPacket
-							(buffer, buffer.length, onlineCheckUserAddress, UDP_SOCKET_NUMBER);
-					try
-					{
-						UDPsocket.send(brodcastPacket);
-					} 
-					catch (IOException e)
-					{
-						System.out.println("Could not send online check packet to: " +username + ". User removed from online list." );					
-						e.printStackTrace();
-						Platform.runLater(() -> 
-						chatModel.
-						getAvailableForChatUsersList().remove(username));
-					
-						chatModel.getUserAvailableToChatMap().
-						remove(username);
-					}									
-				}
-				
 				//Put the thread to sleep for 2 seconds
 				try
 				{

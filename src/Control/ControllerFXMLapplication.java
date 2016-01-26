@@ -84,8 +84,9 @@ public class ControllerFXMLapplication implements Initializable{
     private Label reseauLocalLabel;
 
     @FXML
-    void deconnecter(ActionEvent event) {
-
+    void deconnecter(ActionEvent event) 
+    {
+    	client.closeClientSocket();
     }
     
     @FXML
@@ -411,12 +412,14 @@ public class ControllerFXMLapplication implements Initializable{
 				if (chatModel.isConnectionEstablished())
 				{
 					enableChat();
-					deconnecterButton.setDisable(false);					
+					deconnecterButton.setDisable(false);
+					buttonConnexion.setDisable(true);
 				}
 				else
 				{
 					disableChat();
-					buttonConnexion.setDisable(false);					
+					buttonConnexion.setDisable(false);
+					deconnecterButton.setDisable(true);			
 				}			
 			}
     		
