@@ -382,20 +382,20 @@ public class ControllerFXMLapplication implements Initializable{
 			public void changed(ObservableValue<? extends Boolean> observable,
 					Boolean oldValue, Boolean newValue)
 			{						
-					if (textFieldFichier.isDisabled())
+				if (textFieldFichier.isDisabled())
+				{
+					//Disable the buttonEnvoyer
+					buttonEnvoyerFichier.setDisable(true);		
+				}
+				else
+				{
+					//If the textfield is not empty
+					if (textFieldFichier.getText() != null && !textFieldFichier.getText().trim().isEmpty())
 					{
 						//Disable the buttonEnvoyer
-						buttonEnvoyerFichier.setDisable(true);		
+						buttonEnvoyerFichier.setDisable(false);
 					}
-					else
-					{
-						//If the textfield is not empty
-						if (textFieldFichier.getText() != null && !textFieldFichier.getText().trim().isEmpty())
-						{
-							//Disable the buttonEnvoyer
-							buttonEnvoyerFichier.setDisable(false);
-						}
-					}
+				}
 			}
 		}); 	
     }
@@ -411,21 +411,18 @@ public class ControllerFXMLapplication implements Initializable{
 				if (chatModel.isConnectionEstablished())
 				{
 					enableChat();
-					//Enable the deconnexion button
+					deconnecterButton.setDisable(false);					
 				}
 				else
 				{
 					disableChat();
-					//Disable the deconnexion button
-					
+					buttonConnexion.setDisable(false);					
 				}			
 			}
     		
-    	});
-    	
+    	});	
     }
 
- //******************************************************************METTRE LA LISTVIEW DES USER CONNECTÉ A JOUR***************   
     /**
      * Ask the user to enter a username
      * @return true if the user entered a username

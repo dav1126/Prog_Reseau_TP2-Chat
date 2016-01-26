@@ -305,9 +305,8 @@ public class Client
 	
 		
 	/**
-	 * Broadcast a message for a specific port on the subnetwork of a given ip
-	 * address
-	 *  @param ipAddress given ip address
+	 * Broadcast a message for a specific port on the subnetwork
+	 *
 	 */
 	public void getRemoteUserAvailableForChat()
 	{	
@@ -326,29 +325,7 @@ public class Client
 				}
 			}
 			
-			//Get the broadcast address of the LAN
-			
-			
-			//Get the subnet (works for /16 subnets only)
-//				String localAddress = null;
-//				try
-//				{
-//					localAddress = InetAddress.getLocalHost().getHostAddress();
-//					System.out.println("bla" +localAddress);
-//				} catch (Exception e1)
-//				{
-//					
-//					e1.printStackTrace();
-//				}
-//				String[] ipSplit = localAddress.split("\\.");
-//				String subnetworkPartOfIpAddress = ipSplit[0] + "." + 
-//						ipSplit[1] + ".";
-//				
-//				//Create the broadcast address
-//				String broadcastAddress = subnetworkPartOfIpAddress + "255.255";
-//				System.out.println("BROADCAST:" +broadcastAddress);
-//				InetAddress brodcastInetAddress = null;
-			
+			//Get the LAN broadcast address
 			InetAddress brodcastInetAddress = null;
 			try
 			{
@@ -362,6 +339,8 @@ public class Client
 			//Keep checking for new remote users
 			while (true)
 			{	
+				chatModel.getAvailableForChatUsersList().clear();
+				//Send a broadcast on the lan
 				byte[] buffer = new byte[1];
 				DatagramPacket brodcastPacket = new DatagramPacket
 						(buffer, buffer.length, brodcastInetAddress, UDP_SOCKET_NUMBER);
@@ -419,6 +398,15 @@ public class Client
 						System.out.println("Chat available with: " + username);
 					}
 				}
+				
+				//Check if the users in the list are still online
+				//For each user in the list
+//				for (String username: chatModel.getAvailableForChatUsersList())
+//				{
+//					//Get the ip address of the user, from the map
+//					chatModel.getUserAvailableToChatMap().get(username);
+//					
+//				}
 				
 				//Put the thread to sleep for 2 seconds
 				try
