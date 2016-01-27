@@ -164,6 +164,9 @@ public class Server
 			else if(msgInput.equals(""))
 			{
 				chatModel.setConnectionEstablished(false);
+				Platform.runLater(() -> ChatModel.getInstance().
+						getStatusMessagesList().add
+						("Chat ended: remote user disconnected."));
 			}
 			
 			//else, it means that it is a normal chat message
