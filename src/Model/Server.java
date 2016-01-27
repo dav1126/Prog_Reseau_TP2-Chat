@@ -460,7 +460,22 @@ public class Server
 		}
 		else
 		{
-			System.out.println("Could not close message: server's sockets are null");
+			System.out.println("Could not close servers sockets: server's sockets are null");
+		}	
+	}
+	
+	/**
+	 * Closes the server's sockets
+	 */
+	public void closeUDPSocket()
+	{
+		if(UDPSocket != null)
+		{		
+				UDPSocket.close();
+		}
+		else
+		{
+			System.out.println("Could not close server UDP socket");
 		}	
 	}
 	
