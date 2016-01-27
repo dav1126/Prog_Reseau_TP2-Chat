@@ -180,7 +180,7 @@ public class Server
 			{
 				while (true)
 				{
-					while (serverSocket == null || clientSocket == null)
+					while (serverSocket == null || clientSocket == null || serverSocket.isClosed() || clientSocket.isClosed())
 					{
 						
 						try
@@ -450,7 +450,6 @@ public class Server
 			{
 				clientSocket.close();
 				serverSocket.close();
-				UDPSocket.close();
 			}
 			catch (IOException e)
 			{

@@ -421,9 +421,9 @@ public class ControllerFXMLapplication implements Initializable{
 					disableChat();
 					buttonConnexion.setDisable(false);
 					deconnecterButton.setDisable(true);
-					server.closeServerSockets();
-					server.startOpenSocketThread();
-					server.startReceiveMessageThread();
+//					server.closeServerSockets();
+//					server.startOpenSocketThread();
+//					server.startReceiveMessageThread();
 				}			
 			}
     		
