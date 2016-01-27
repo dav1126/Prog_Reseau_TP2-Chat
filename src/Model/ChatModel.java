@@ -24,6 +24,8 @@ public class ChatModel
 	private BooleanProperty connectionEstablished;
 	
 	private String remoteUserIpAddress = null;
+	
+	private String remoteUsername;
 
 	private ChatModel()
 	{
@@ -87,5 +89,15 @@ public class ChatModel
 		}
 		
 		return instance;
+	}
+	
+	public void setRemoteUsername(String username)
+	{
+		remoteUsername = username;
+	}
+	
+	public String getRemoteUsername()
+	{
+		return remoteUsername;
 	}
 }

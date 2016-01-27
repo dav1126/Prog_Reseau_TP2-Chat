@@ -116,7 +116,8 @@ public class ControllerFXMLapplication implements Initializable{
     @FXML
     void envoyerMessage() 
     {
-    	client.sendMessage(textFieldMessageSaisie.getText());
+    	client.sendMessage(textFieldMessageSaisie.getText(), textFieldNomUtilisateur.getText());
+    	textFieldMessageSaisie.setText("");
     }
 
     @FXML
@@ -127,7 +128,8 @@ public class ControllerFXMLapplication implements Initializable{
     	String remoteUserIp = chatModel.getUserAvailableToChatMap().get(selectedRemoteUser);
      	
     	client.openClientSocket(remoteUserIp);
-    	client.sendChatRequest(textFieldNomUtilisateur.getText());
+    	client.sendChatRequest(textFieldNomUtilisateur.getText(), selectedRemoteUser);
+    	
     	
 //    	synchronized (client.getControllerThreadLock())
 //		{
@@ -169,8 +171,8 @@ public class ControllerFXMLapplication implements Initializable{
     }
 
 	@FXML
-    void quitter(ActionEvent event) {
-    	System.exit(0);
+    void quitter() {
+		System.exit(0);
     }
     
     public void initialize(URL location, ResourceBundle resources)
@@ -229,6 +231,7 @@ public class ControllerFXMLapplication implements Initializable{
 	    	
 	    	//Set a listener on the ChatModel's connectionEstablished property
 	    	setConnectionEstablishedListener();
+	    		    	
     	}
     	else
     	{
@@ -285,6 +288,7 @@ public class ControllerFXMLapplication implements Initializable{
 		        		    if (choix.get() == buttonTypeAccepter)
 		        		    {
 		        		        client.openClientSocket(server.getChatRequestApplicantIp());
+		        		        chatModel.setRemoteUsername(server.getChatRequestApplicantUsername());
 		        		        server.setChatRequestAccepted(true);
 		        		        enableChat();
 		        		    }

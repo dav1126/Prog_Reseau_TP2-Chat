@@ -45,6 +45,8 @@ public class Server
 	private boolean chatRequestAccepted =  false;
 	
 	private ChatModel chatModel = ChatModel.getInstance();
+	
+	private String remoteUsername;
 
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
@@ -184,7 +186,7 @@ public class Server
 			else
 			{	
 				final String chatMessage = msgInput;//final variable necessary to add to the ChatMessagesList
-				Platform.runLater(() -> chatModel.getChatMessagesList().add(chatMessage)); 
+				Platform.runLater(() -> chatModel.getChatMessagesList().add(chatModel.getRemoteUsername() + ": " +chatMessage)); 
 			}	
 	}
 	/**

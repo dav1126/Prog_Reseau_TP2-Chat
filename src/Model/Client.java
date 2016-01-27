@@ -87,7 +87,7 @@ public class Client
 		return chatRequestAccepted;
 	}
 
-	public void sendMessage(String message)
+	public void sendMessage(String message, String username)
 	{
 		Thread thread =  new Thread(() ->
 		{
@@ -108,7 +108,7 @@ public class Client
 			{
 				OutputStream output = clientSocket.getOutputStream();
 				output.write(message.getBytes());
-				Platform.runLater(() -> chatModel.getChatMessagesList().add(message)); 
+				Platform.runLater(() -> chatModel.getChatMessagesList().add(username + ": " +message)); 
 			} catch (IOException e)
 			{
 				System.out.println("Message could not be sent");
@@ -509,7 +509,7 @@ public class Client
 		return broadcastAddress;
 	}
 	
-	public void sendChatRequest(String username)
+	public void sendChatRequest(String username, String remoteUsername)
 	{
 		//Make sure the chatResquestAccepted flag is false
 		chatRequestAccepted = false;
@@ -538,10 +538,9 @@ public class Client
 				output.write(message.getBytes());
 				
 				//Get an answer in another thread
-				
-				getAnswerToChatRequest();
 				Platform.runLater(() ->
 				chatModel.getStatusMessagesList().add("Waiting 10 sec for answer..."));
+				getAnswerToChatRequest(remoteUsername);
 				
 			} catch (IOException e)
 			{
@@ -556,7 +555,7 @@ public class Client
 	 * Changes the boolean chatRequestAccepted depending on the answer
 	 */
 	
-	private void getAnswerToChatRequest()
+	private void getAnswerToChatRequest(String remoteUsername)
 	{
 		ExecutorService service = Executors.newSingleThreadExecutor();
 
@@ -586,6 +585,7 @@ public class Client
 							Platform.runLater(() ->
 							chatModel.getStatusMessagesList().add("Chat resquest accepted by remote user."));
 							chatModel.setConnectionEstablished(true);
+							chatModel.setRemoteUsername(remoteUsername);
 						}
 						else
 						{
