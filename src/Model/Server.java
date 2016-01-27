@@ -22,6 +22,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 
+/**
+ * Gère la partie serveur du programme
+ * @author 0345162
+ *
+ */
 public class Server
 {
 	/**

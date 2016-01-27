@@ -1,5 +1,8 @@
 package Model;
 
+/**
+ * Gère la partie client du programme
+ */
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
