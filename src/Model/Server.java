@@ -152,13 +152,22 @@ public class Server
 				if (chatRequestAccepted)
 				{
 					answer = "yes";
+					//Send the answer back to the request applicant
+					OutputStream bOStream = clientSocket.getOutputStream();
+					bOStream.write(answer.getBytes());
+					bOStream.flush();
+					
 					chatModel.setConnectionEstablished(true);
 				}
-				
-				//Send the answer back to the request applicant
-				OutputStream bOStream = clientSocket.getOutputStream();
-				bOStream.write(answer.getBytes());
-				bOStream.flush();
+				else
+				{
+					//Send the answer back to the request applicant
+					OutputStream bOStream = clientSocket.getOutputStream();
+					bOStream.write(answer.getBytes());
+					bOStream.flush();
+					
+					chatModel.setConnectionEstablished(false);
+				}
 			}
 			//if the message is empty, it means the remote host ended the connection
 			else if(msgInput.equals(""))
