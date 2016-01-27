@@ -165,8 +165,9 @@ public class Server
 					OutputStream bOStream = clientSocket.getOutputStream();
 					bOStream.write(answer.getBytes());
 					bOStream.flush();
+					//Wait for another client connection
 					clientSocket = null;
-					startOpenSocketThread();
+					clientSocket = serverSocket.accept();
 				}
 			}
 			
