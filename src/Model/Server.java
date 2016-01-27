@@ -160,6 +160,12 @@ public class Server
 				bOStream.write(answer.getBytes());
 				bOStream.flush();
 			}
+			//if the message is empty, it means the remote host ended the connection
+			else if(msgInput.equals(""))
+			{
+				chatModel.setConnectionEstablished(false);
+			}
+			
 			//else, it means that it is a normal chat message
 			else
 			{	
@@ -181,8 +187,7 @@ public class Server
 				while (true)
 				{
 					while (serverSocket == null || clientSocket == null || serverSocket.isClosed() || clientSocket.isClosed())
-					{
-						
+					{						
 						try
 						{
 							Thread.sleep(10);
