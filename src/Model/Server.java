@@ -54,6 +54,7 @@ public class Server
 	{
 		Thread thread =  new Thread(() ->
 		{
+			
 			try
 			{
 				serverSocket = new ServerSocket(SERVER_SOCKET_NUMBER);
@@ -165,6 +166,7 @@ public class Server
 					bOStream.write(answer.getBytes());
 					bOStream.flush();
 					clientSocket = null;
+					startOpenSocketThread();
 				}
 			}
 			
