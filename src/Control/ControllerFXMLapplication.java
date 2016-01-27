@@ -88,6 +88,9 @@ public class ControllerFXMLapplication implements Initializable{
     {
     	chatModel.getConnectionEstablishedProperty().set(false);
     	client.closeClientSocket();
+    	Platform.runLater(() -> ChatModel.getInstance().
+				getStatusMessagesList().add
+				("Chat ended: you disconnected."));
     }
     
     @FXML
@@ -421,9 +424,6 @@ public class ControllerFXMLapplication implements Initializable{
 					disableChat();
 					buttonConnexion.setDisable(false);
 					deconnecterButton.setDisable(true);
-					Platform.runLater(() -> ChatModel.getInstance().
-							getStatusMessagesList().add
-							("Chat ended: you disconnected."));
 					server.closeServerSockets();
 					server.startOpenSocketThread();
 					server.startReceiveMessageThread();
