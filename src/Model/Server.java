@@ -131,7 +131,7 @@ public class Server
 				
 				//This boolean property change triggers a listener that pops an alert asking the user to 
 				//accept or refuse the chat request (see in ControllerFXMLApplication class).
-				//The use choice changes the chatRequestAccepted attribute
+				//The user choice changes the chatRequestAccepted attribute
 				chatRequestedBooleanProperty.setValue(true);
 				
 				//Make this thread wait for an answer from the user
@@ -150,13 +150,15 @@ public class Server
 				//Prepare the answer to the request base on the choice of the user
 				String answer = "no";
 				if (chatRequestAccepted)
+				{
 					answer = "yes";
+					chatModel.setConnectionEstablished(true);
+				}
 				
 				//Send the answer back to the request applicant
 				OutputStream bOStream = clientSocket.getOutputStream();
 				bOStream.write(answer.getBytes());
 				bOStream.flush();
-				chatModel.setConnectionEstablished(true);
 			}
 			//else, it means that it is a normal chat message
 			else

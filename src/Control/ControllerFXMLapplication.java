@@ -86,6 +86,7 @@ public class ControllerFXMLapplication implements Initializable{
     @FXML
     void deconnecter(ActionEvent event) 
     {
+    	chatModel.getConnectionEstablishedProperty().set(false);
     	client.closeClientSocket();
     }
     
