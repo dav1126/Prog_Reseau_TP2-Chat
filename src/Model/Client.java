@@ -538,7 +538,10 @@ public class Client
 				output.write(message.getBytes());
 				
 				//Get an answer in another thread
+				
 				getAnswerToChatRequest();
+				Platform.runLater(() ->
+				chatModel.getStatusMessagesList().add("Waiting 10 sec for answer..."));
 				
 			} catch (IOException e)
 			{

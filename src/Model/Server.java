@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -16,6 +17,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -51,18 +53,28 @@ public class Server
 	 * connection with a client
 	 */
 	public void openServerSockets()
-	{
-		Thread thread =  new Thread(() ->
-		{
-			
+	{		
 			try
 			{
 				serverSocket = new ServerSocket(SERVER_SOCKET_NUMBER);
-				clientSocket = serverSocket.accept();
 			} 
 			catch (IOException e)
 			{
 				System.out.println("Could not open server's sockets");
+				e.printStackTrace();
+			}
+	}
+	
+	public void startAcceptClientSocketThread()
+	{
+		Thread thread =  new Thread(() ->
+		{
+			try
+			{
+				clientSocket = serverSocket.accept();
+			} catch (IOException e)
+			{
+				System.out.println("Could not accept client socket");
 				e.printStackTrace();
 			}
 		});
@@ -167,7 +179,7 @@ public class Server
 					bOStream.flush();
 					//Wait for another client connection
 					clientSocket = null;
-					clientSocket = serverSocket.accept();
+					startAcceptClientSocketThread();
 				}
 			}
 			
@@ -495,19 +507,6 @@ public class Server
 		{
 			System.out.println("Could not close server UDP socket");
 		}	
-	}
-	
-	/**
-	 * Creates and starts a thread that opens the server's sockets and wait
-	 * for a message to come trough the channel
-	 */
-	public void startOpenSocketThread()
-	{
-		Thread thread =  new Thread(() ->
-		{
-			openServerSockets();
-		});
-		thread.start();
 	}
 	
 	public String getLANIPAddress() throws SocketException
