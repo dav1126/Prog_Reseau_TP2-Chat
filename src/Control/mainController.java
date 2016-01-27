@@ -13,27 +13,37 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-
+/**
+ * Classe permettant de faire le liena avec la vue et de démarrer le programme
+ * @author 0345162
+ *
+ */
 public class mainController extends Application
 {
-	
+
 	/**
-	 * Gestionnaire d'événements utilisé pour gérer la fermeture du stage 
+	 * Gestionnaire d'événements utilisé pour gérer la fermeture du stage
 	 * principale
 	 */
 	EventHandler<WindowEvent> windowEventHandler;
 
-public static void main(String[] args) {
-		
-		Application.launch(args);		
+	public static void main(String[] args)
+	{
+
+		Application.launch(args);
 	}
-	
+
+	/**
+	 * Démarre l'application
+	 */
 	public void start(Stage pStage) throws Exception
 	{
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("../View/FXMLapplication.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource(
+				"../View/FXMLapplication.fxml"));
 		AnchorPane root = (AnchorPane) loader.load();
-		ControllerFXMLapplication subController = (ControllerFXMLapplication)loader.getController();
-		
+		ControllerFXMLapplication subController = (ControllerFXMLapplication) loader
+				.getController();
+
 		Scene scene = new Scene(root);
 		pStage.setScene(scene);
 		pStage.setTitle("Chat Application");
@@ -42,12 +52,14 @@ public static void main(String[] args) {
 	}
 
 	/**
-	 * Ajoute un gestionnaire de fenêtre au stage principal pour gérer sa 
+	 * Ajoute un gestionnaire de fenêtre au stage principal pour gérer sa
 	 * fermeture
+	 * 
 	 * @param stage
 	 * @param mainController
 	 */
-	private void addSubControllerWindowEventHandler(Stage stage, ControllerFXMLapplication subController)
+	private void addSubControllerWindowEventHandler(Stage stage,
+			ControllerFXMLapplication subController)
 	{
 		windowEventHandler = new EventHandler<WindowEvent>()
 		{
@@ -55,10 +67,11 @@ public static void main(String[] args) {
 			public void handle(WindowEvent event)
 			{
 				event.consume();
-				subController.quitter();	
-			}	
+				subController.quitter();
+			}
 		};
-		stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowEventHandler);
+		stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST,
+				windowEventHandler);
 	}
 
 }

@@ -24,28 +24,93 @@ import javafx.beans.value.ObservableBooleanValue;
 
 public class Server
 {
+	/**
+	 * UDP socket used to receive broadcast message from clients
+	 */
 	DatagramSocket UDPSocket;
+	
+	/**
+	 * Client socket
+	 */
 	Socket clientSocket = null;
+	
+	/**
+	 * Server socket
+	 */
 	ServerSocket serverSocket = null;
+	
+	/**
+	 * Taille max des transmissions (10mo)
+	 */
 	private static final int MAX_TRANSMISSION_BYTE_SIZE = 10000000;
+	
+	/**
+	 * Code indicateur de transmission de fichier
+	 */
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(*ALPHA";
+	
+	/**
+	 * Chemin d'Accès au repertoire de sauvegarde de fichier
+	 */
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
+	
+	/**
+	 * Numero de port du socket UDP
+	 */
 	private static final int UDP_SOCKET_NUMBER = 5556;
+	
+	/**
+	 * Numero de port du socket server
+	 */
 	private static final int SERVER_SOCKET_NUMBER = 5555;
+	
+	/**
+	 * Code renvoyé par le serveur lorsqu'il recoit un broadcast de son propre 
+	 * client
+	 */
 	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
 			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
+	
+	/**
+	 * Code de demande de chat
+	 */
 	private static final String CHAT_REQUEST_CODE = 
 			"Yhwa6WY6ywiob8W*0!90aw9898awWAJm(7(";
+	
+	/**
+	 * Proprité booléenne de demande de chat. Déclenche un listener dans le control.
+	 */
 	private BooleanProperty chatRequestedBooleanProperty = new SimpleBooleanProperty();
+	
+	/**
+	 * Username du client demandant de démarrer un chat
+	 */
 	private String chatRequestApplicantUsername;
+	
+	/**
+	 * Ip du client demandant de démarrer un chat
+	 */
 	private String chatRequestApplicantIp;
+	
+	/**
+	 * Objet utilisé pour locker le thread de reception de message
+	 */
 	Object receiveMessageThreadLock = new Object();
 
+	/**
+	 * Boolean de demande de chat acceptée
+	 */
 	private boolean chatRequestAccepted =  false;
 	
+	/**
+	 * Pointeur vers le singleton ChatModel
+	 */
 	private ChatModel chatModel = ChatModel.getInstance();
 	
+	/**
+	 * Username du client distant
+	 */
 	private String remoteUsername;
 
 	/**
@@ -236,6 +301,9 @@ public class Server
 		thread.start();
 	}
 	
+	/**
+	 * Create and start a thread that manage the reception of a file
+	 */
 	private void startReceiveFile()
 	{
 		Thread thread =  new Thread(() ->
@@ -376,9 +444,9 @@ public class Server
 	}
 	
 	/**
-	 * Receive broadcast messages from remote clients, and sens back a username
-	 * Used to be be shown as available for chat on remote users apps. Repeated
-	 * each 5 seconds for a refresh. 
+	 * Receive broadcast messages from remote clients, and send back a username
+	 * Used to be be shown as online to other users. Repeated
+	 * each for refresh. 
 	 */
 	public void receiveBroadcastRequests(String username)
 	{
@@ -457,7 +525,7 @@ public class Server
 		thread.start();
 		Platform.runLater(() -> ChatModel.getInstance().
 				getStatusMessagesList().add
-				("Server detecting online users each 2 sec..."));
+				("Server detecting online users..."));
 	}
 	
 	/**
@@ -485,7 +553,7 @@ public class Server
 	}
 	
 	/**
-	 * Closes the server's sockets
+	 * Closes the server's UDP socket
 	 */
 	public void closeUDPSocket()
 	{
@@ -501,7 +569,7 @@ public class Server
 	
 	/**
 	 * Creates and starts a thread that opens the server's sockets and wait
-	 * for a message to come trough the channel
+	 * for client to connect
 	 */
 	public void startOpenSocketThread()
 	{
@@ -512,6 +580,11 @@ public class Server
 		thread.start();
 	}
 	
+	/**
+	 * Get this server LAN ip address
+	 * @return
+	 * @throws SocketException
+	 */
 	public String getLANIPAddress() throws SocketException
 	{
 		String lanAddress = null;
@@ -548,37 +621,65 @@ public class Server
 		return lanAddress;
 	}
 	
+	/**
+	 * Returns the chatRequestedBooleanProperty
+	 * @return chatRequestedBooleanProperty
+	 */
 	public BooleanProperty getChatRequestedBooleanProperty()
 	{
 		return chatRequestedBooleanProperty;
 	}
 
+	/**
+	 * Sets the chatRequestedBooleanProperty
+	 * @param chatRequestedBooleanProperty
+	 */
 	public void setChatRequestedBooleanProperty(
 			BooleanProperty chatRequestedBooleanProperty)
 	{
 		this.chatRequestedBooleanProperty = chatRequestedBooleanProperty;
 	}
 	
+	/**
+	 * Returns the chat applicant username
+	 * @return chat applicant username
+	 */
 	public String getChatRequestApplicantUsername()
 	{
 		return chatRequestApplicantUsername;
 	}
 	
+	/**
+	 * Returns the chat applicant ip address
+	 * @return chat applicant ip address
+	 */
 	public String getChatRequestApplicantIp()
 	{
 		return chatRequestApplicantIp;
 	}
 	
+	/**
+	 * Return true if the chat resquest is accepted by the server
+	 * @return true or false
+	 */
 	public boolean isChatRequestAccepted()
 	{
 		return chatRequestAccepted;
 	}
 
+	/**
+	 * Set the chatRequestAccepted boolean
+	 * @param chatRequestAccepted
+	 */
 	public void setChatRequestAccepted(boolean chatRequestAccepted)
 	{
 		this.chatRequestAccepted = chatRequestAccepted;
 	}
 	
+	/**
+	 * Returns the Object used to lock the receive message thread
+	 * @return receiveMessageThreadLock
+	 */
 	public Object getReceiveMessageThreadLock()
 	{
 		return receiveMessageThreadLock;
