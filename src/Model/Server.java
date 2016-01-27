@@ -156,7 +156,6 @@ public class Server
 					OutputStream bOStream = clientSocket.getOutputStream();
 					bOStream.write(answer.getBytes());
 					bOStream.flush();
-					
 					chatModel.setConnectionEstablished(true);
 				}
 				else
@@ -165,10 +164,10 @@ public class Server
 					OutputStream bOStream = clientSocket.getOutputStream();
 					bOStream.write(answer.getBytes());
 					bOStream.flush();
-					
-					chatModel.setConnectionEstablished(false);
+					clientSocket = null;
 				}
 			}
+			
 			//if the message is empty, it means the remote host ended the connection
 			else if(msgInput.equals(""))
 			{
