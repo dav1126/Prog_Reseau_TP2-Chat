@@ -197,6 +197,7 @@ public class Server
 			}
 			catch (IOException e)
 			{
+				//If the remote user closes it's socket
 				if (e instanceof SocketException)
 				{
 					clientSocket = null;

@@ -30,7 +30,7 @@ import javafx.application.Platform;
 
 public class Client
 {
-	Socket clientSocket;
+	public Socket clientSocket;
 	DatagramSocket UDPsocket;
 	private static final int MAX_TRANSMISSION_BYTE_SIZE = 10000000;
 	private static final String FILE_TRANSMISSION_ALERT_MSG = 
