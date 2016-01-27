@@ -187,7 +187,6 @@ public class ControllerFXMLapplication implements Initializable{
 	    	
 	    	//Open the server socket and start to wait for message
 	    	server.openServerSockets();
-	    	server.startAcceptClientSocketThread();
 	    	server.startReceiveMessageThread();
 	    	
 	    	//Open the client socket used to send UDP broadcast to remote servers
@@ -426,7 +425,7 @@ public class ControllerFXMLapplication implements Initializable{
 					buttonConnexion.setDisable(false);
 					deconnecterButton.setDisable(true);
 					server.closeServerSockets();
-					server.startAcceptClientSocketThread();
+					server.startOpenSocketThread();
 					server.startReceiveMessageThread();
 				}			
 			}
