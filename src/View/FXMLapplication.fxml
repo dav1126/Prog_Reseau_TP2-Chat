@@ -86,5 +86,6 @@
       <Label layoutX="636.0" layoutY="27.0" text="Réseau local:" />
       <Label fx:id="reseauLocalLabel" layoutX="636.0" layoutY="51.0" text="dsn de reseau local ici" />
       <Button fx:id="deconnecterButton" disable="true" layoutX="636.0" layoutY="281.0" mnemonicParsing="false" onAction="#deconnecter" prefHeight="25.0" prefWidth="86.0" text="Déconnexion" />
+      <Button fx:id="buttonSauvegarderFichier" disable="true" layoutX="457.0" layoutY="340.0" mnemonicParsing="false" onAction="#sauvegarderFichier" text="Sauvegarder fichier" />
    </children>
 </AnchorPane>

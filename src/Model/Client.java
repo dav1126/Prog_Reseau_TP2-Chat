@@ -1,7 +1,7 @@
 package Model;
 
 /**
- * Gère la partie client du programme
+ * Gï¿½re la partie client du programme
  */
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -34,12 +34,12 @@ import javafx.application.Platform;
 public class Client
 {
 	/**
-	 * Socket client utilisé pour les envoie de fichiers et message
+	 * Socket client utilisï¿½ pour les envoie de fichiers et message
 	 */
 	public Socket clientSocket;
 
 	/**
-	 * Socket UDP utilisé pour scanner le LAN pour detecter les utilisateurs
+	 * Socket UDP utilisï¿½ pour scanner le LAN pour detecter les utilisateurs
 	 * online
 	 */
 	DatagramSocket UDPsocket;
@@ -66,20 +66,20 @@ public class Client
 	private static final int SERVER_SOCKET_NUMBER = 5555;
 
 	/**
-	 * Code renvoyé par le serveur lorsqu'il ignore les broadcast de son propre
+	 * Code renvoyï¿½ par le serveur lorsqu'il ignore les broadcast de son propre
 	 * client
 	 */
 	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
 			"OWIAJ*(&wa708hWAH(wauiwA&()8979790jdwOA!?";
 
 	/**
-	 * Code envoyé pour demander de démarrer le chat a un utilisateur distant
+	 * Code envoyï¿½ pour demander de dï¿½marrer le chat a un utilisateur distant
 	 */
 	private static final String CHAT_REQUEST_CODE = 
 			"Yhwa6WY6ywiob8W*0!90aw9898awWAJm(7(";
 
 	/**
-	 * Booleen indiquant si la demande de chat est accepté
+	 * Booleen indiquant si la demande de chat est acceptï¿½
 	 */
 	private boolean chatRequestAccepted = false;
 
@@ -403,8 +403,7 @@ public class Client
 									.println("Client could not send broadcast packet");
 							e.printStackTrace();
 						}
-						System.out
-								.println("Brodcast message sent from client.");
+						
 
 						// Wait for a response from a server, the server
 						// responds with

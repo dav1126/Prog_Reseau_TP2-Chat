@@ -12,6 +12,7 @@ import Model.ChatModel;
 import Model.Client;
 import Model.Server;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -99,7 +100,11 @@ public class ControllerFXMLapplication implements Initializable
 
 	@FXML
 	private Label reseauLocalLabel;
-
+	 
+	@FXML
+	private Button buttonSauvegarderFichier;
+	 
+	private final Timeline timeline = new Timeline();
 	/**
 	 * Gere la deconnection a un utilisateur distant
 	 */
@@ -140,7 +145,7 @@ public class ControllerFXMLapplication implements Initializable
 	}
 
 	/**
-	 * Envoie le message tapé par l'utilisateur
+	 * Envoie le message tapï¿½ par l'utilisateur
 	 */
 	@FXML
 	private void envoyerMessage()
@@ -151,7 +156,7 @@ public class ControllerFXMLapplication implements Initializable
 	}
 
 	/**
-	 * Établi la connexion à l'utilisateur sélectionné dans le ListView
+	 * ï¿½tabli la connexion ï¿½ l'utilisateur sï¿½lectionnï¿½ dans le ListView
 	 */
 	@FXML
 	private void etablirConnexion()
@@ -249,6 +254,7 @@ public class ControllerFXMLapplication implements Initializable
 								buttonConnexion.setDisable(false);
 							else
 								buttonConnexion.setDisable(true);
+								timeline.stop();
 						}
 					});
 
@@ -265,6 +271,22 @@ public class ControllerFXMLapplication implements Initializable
 
 			// Set a listener on the ChatModel's connectionEstablished property
 			setConnectionEstablishedListener();
+			
+			server.getFileNotify().addListener(new ChangeListener<Object>() {
+
+				@Override
+				public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+					if (server.getFileNotify().get())
+					{
+						addBlinkingAnimation();
+					}
+					else
+					{
+						buttonSauvegarderFichier.setDisable(true);
+						timeline.stop();
+					}
+				}
+			});
 
 		} else
 		{
@@ -306,7 +328,7 @@ public class ControllerFXMLapplication implements Initializable
 									alert.setHeaderText(null);
 									alert.setContentText(server
 											.getChatRequestApplicantUsername()
-											+ " veux chatter avec vous!\n Vous avez 10 secondes pour répondre...");
+											+ " veux chatter avec vous!\n Vous avez 10 secondes pour rï¿½pondre...");
 
 									ButtonType buttonTypeAccepter = new ButtonType(
 											"Accepter");
@@ -531,5 +553,41 @@ public class ControllerFXMLapplication implements Initializable
 
 		return nameEntered;
 	}
-
+	
+	 @FXML
+	 void sauvegarderFichier(ActionEvent event) {
+	    	String nomFile = server.getFileName();
+	    	
+	    FileChooser fileChooser = new FileChooser();
+ 		fileChooser.setTitle("Enregistrer sous");
+ 		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+ 		fileChooser.setInitialFileName(nomFile);
+ 		File fileSavePath = fileChooser.showSaveDialog(new Stage());
+ 		
+ 		server.setFile(fileSavePath);
+ 		//passage vers le server
+ 		server.setFile(fileSavePath);
+ 		System.out.println("main path : " +server.getFile().getPath());
+ 		synchronized (server.getLockFile()) 
+ 		{
+				server.getLockFile().notify();
+		}
+ 		
+ 		server.getFileNotify().set(false);
+	    
+	 }
+	 
+	 private void addBlinkingAnimation()
+	    {
+		 	buttonSauvegarderFichier.setDisable(false);
+	    	
+	    	timeline.setCycleCount(Timeline.INDEFINITE);
+	    	timeline.setAutoReverse(true);
+	    	final KeyValue kv = new KeyValue(buttonSauvegarderFichier.opacityProperty(), 0.0);
+	    	final KeyFrame kf = new KeyFrame(Duration.millis(700), kv);
+	    	timeline.getKeyFrames().add(kf);
+	    	timeline.play();
+	    	
+	    }
+	 
 }

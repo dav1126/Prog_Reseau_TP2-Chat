@@ -23,7 +23,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 
 /**
- * Gère la partie serveur du programme
+ * Gï¿½re la partie serveur du programme
  * @author 0345162
  *
  */
@@ -56,7 +56,7 @@ public class Server
 			"NHRTYFHAPWLM*?DYXN!848145489WJD23243212owahAwfligLOP)(*ALPHA";
 	
 	/**
-	 * Chemin d'Accès au repertoire de sauvegarde de fichier
+	 * Chemin d'Accï¿½s au repertoire de sauvegarde de fichier
 	 */
 	private static final String PATH_TO_FILE_DIRECTORY = "C:\\temp\\destination\\";
 	
@@ -71,7 +71,7 @@ public class Server
 	private static final int SERVER_SOCKET_NUMBER = 5555;
 	
 	/**
-	 * Code renvoyé par le serveur lorsqu'il recoit un broadcast de son propre 
+	 * Code renvoyï¿½ par le serveur lorsqu'il recoit un broadcast de son propre 
 	 * client
 	 */
 	private static final String BROADCAST_ANSWER_IGNORE_CODE = 
@@ -84,27 +84,27 @@ public class Server
 			"Yhwa6WY6ywiob8W*0!90aw9898awWAJm(7(";
 	
 	/**
-	 * Proprité booléenne de demande de chat. Déclenche un listener dans le control.
+	 * Propritï¿½ boolï¿½enne de demande de chat. Dï¿½clenche un listener dans le control.
 	 */
 	private BooleanProperty chatRequestedBooleanProperty = new SimpleBooleanProperty();
 	
 	/**
-	 * Username du client demandant de démarrer un chat
+	 * Username du client demandant de dï¿½marrer un chat
 	 */
 	private String chatRequestApplicantUsername;
 	
 	/**
-	 * Ip du client demandant de démarrer un chat
+	 * Ip du client demandant de dï¿½marrer un chat
 	 */
 	private String chatRequestApplicantIp;
 	
 	/**
-	 * Objet utilisé pour locker le thread de reception de message
+	 * Objet utilisï¿½ pour locker le thread de reception de message
 	 */
 	Object receiveMessageThreadLock = new Object();
 
 	/**
-	 * Boolean de demande de chat acceptée
+	 * Boolean de demande de chat acceptï¿½e
 	 */
 	private boolean chatRequestAccepted =  false;
 	
@@ -117,7 +117,31 @@ public class Server
 	 * Username du client distant
 	 */
 	private String remoteUsername;
+	
+	private Object lockFile = new Object();
+	
 
+	private File file = new File("");
+	
+	public File getFile()
+	{
+		return this.file;
+	}
+	public void setFile(File file)
+	{
+		this.file = file;
+	}
+	
+	private BooleanProperty fileNotify = new SimpleBooleanProperty(false);
+	
+	private String fileName;
+	
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 	/**
 	 * Opens the server's sockets and establish a wait to establish a remote
 	 * connection with a client
@@ -326,7 +350,24 @@ public class Server
 					e.printStackTrace();
 				}
 			}
-				String fileName = receiveFileName();
+				fileName = receiveFileName();
+				
+				
+				
+				synchronized (lockFile) {
+					try {
+						System.out.println("avant wait");
+						
+						fileNotify.set(true);
+						
+						lockFile.wait();
+						System.out.println("apres wait");
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 				receiveFile(fileName);
 				
 			//Notify the message thread that the file reception is done
@@ -386,10 +427,13 @@ public class Server
 		{
 			//Get the file
 			InputStream bIStream = clientSocket.getInputStream();
-			File filePath = new File(PATH_TO_FILE_DIRECTORY);
-			filePath.mkdirs();
-			File file = new File(PATH_TO_FILE_DIRECTORY, fileName);
-			
+			//File filePath = new File(PATH_TO_FILE_DIRECTORY);
+			//File filePath = new File(PATH_TO_FILE_DIRECTORY);
+			//filePath.mkdirs();
+	//recuperation 		
+			File file = getFile();
+
+			System.out.println("path recu par le thread " + file.getPath());
 			file.createNewFile();
 			fos = new FileOutputStream(file);
 			
@@ -491,7 +535,7 @@ public class Server
 				{
 					UDPSocket.receive(remoteHostPacket);
 					String remoteIpAddress = remoteHostPacket.getAddress().getHostAddress();
-					System.out.println( "BroadCast request from: " + remoteIpAddress);
+					//System.out.println( "BroadCast request from: " + remoteIpAddress);
 					//If the broadcast message is from a remote client
 					if (!remoteIpAddress.equals(lanIPAddress))
 					{
@@ -502,7 +546,7 @@ public class Server
 										remoteHostPacket.getAddress(), 
 										remoteHostPacket.getPort());
 						UDPSocket.send(responsePacket);
-						System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
+						//System.out.println( "BroadCast answer sent to: " + remoteIpAddress);
 					}
 					//If the broadcast message is from this program's own client
 					else
@@ -515,8 +559,8 @@ public class Server
 										remoteHostPacket.getAddress(), 
 										remoteHostPacket.getPort());
 						UDPSocket.send(responsePacket);
-						System.out.println
-						("Broadcast answer ignore code sent to own client.");
+						//System.out.println
+						//("Broadcast answer ignore code sent to own client.");
 					}
 				}
 				catch (IOException e)
@@ -688,5 +732,15 @@ public class Server
 	public Object getReceiveMessageThreadLock()
 	{
 		return receiveMessageThreadLock;
+	}
+	public BooleanProperty getFileNotify() {
+		return fileNotify;
+	}
+	public void setFileNotify(BooleanProperty fileNotify) {
+		this.fileNotify = fileNotify;
+	}
+	
+	public Object getLockFile() {
+		return lockFile;
 	}
 }
