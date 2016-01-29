@@ -158,7 +158,7 @@ public class Server
 			} 
 			catch (IOException e)
 			{
-				System.out.println("Could not open server's sockets");
+				//System.out.println("Could not open server's sockets");
 				e.printStackTrace();
 			}
 		});
@@ -191,7 +191,7 @@ public class Server
 					//System.out.println(msgInput);
 				}
 			
-			System.out.println("Received Message" + msgInput);
+			//System.out.println("Received Message" + msgInput);
 			
 			//If the received message is the file transmission alert message
 			if (msgInput.compareTo(FILE_TRANSMISSION_ALERT_MSG) == 0)
@@ -213,7 +213,7 @@ public class Server
 						receiveMessageThreadLock.wait();
 					} catch (InterruptedException e)
 					{
-						System.out.println("Server receive mesage thread wait error.");
+						//System.out.println("Server receive mesage thread wait error.");
 						e.printStackTrace();
 					}
 				}
@@ -224,7 +224,7 @@ public class Server
 			{
 				chatRequestApplicantUsername = msgInput.substring(CHAT_REQUEST_CODE.length());
 				chatRequestApplicantIp = clientSocket.getInetAddress().getHostAddress();
-				System.out.println("Server detected a chat request from :" + chatRequestApplicantUsername + "  " + chatRequestApplicantIp);
+				//System.out.println("Server detected a chat request from :" + chatRequestApplicantUsername + "  " + chatRequestApplicantIp);
 				
 				//This boolean property change triggers a listener that pops an alert asking the user to 
 				//accept or refuse the chat request (see in ControllerFXMLApplication class).
@@ -239,7 +239,7 @@ public class Server
 						receiveMessageThreadLock.wait();
 					} catch (InterruptedException e)
 					{
-						System.out.println("Server receive mesage thread wait error.");
+						//System.out.println("Server receive mesage thread wait error.");
 						e.printStackTrace();
 					}
 				}
@@ -346,7 +346,7 @@ public class Server
 				} 
 				catch (Exception e)
 				{
-					System.out.println("Server receive file thread sleep error");
+					//System.out.println("Server receive file thread sleep error");
 					e.printStackTrace();
 				}
 			}
@@ -356,12 +356,12 @@ public class Server
 				
 				synchronized (lockFile) {
 					try {
-						System.out.println("avant wait");
+						//System.out.println("avant wait");
 						
 						fileNotify.set(true);
 						
 						lockFile.wait();
-						System.out.println("apres wait");
+						//System.out.println("apres wait");
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -410,7 +410,7 @@ public class Server
 			
 		catch (IOException e)
 		{
-			System.out.println("Could not receive file.");
+			//System.out.println("Could not receive file.");
 			e.printStackTrace();
 		}
 		
@@ -433,7 +433,7 @@ public class Server
 	//recuperation 		
 			File file = getFile();
 
-			System.out.println("path recu par le thread " + file.getPath());
+			//System.out.println("path recu par le thread " + file.getPath());
 			file.createNewFile();
 			fos = new FileOutputStream(file);
 			
@@ -446,7 +446,7 @@ public class Server
 					fos.write(byteBuffer[i]);
 				}
 			
-			System.out.println("File received: " + file.getName());
+			//System.out.println("File received: " + file.getName());
 			Platform.runLater(() -> 
 			chatModel.getStatusMessagesList().add("File received: " + fileName));
 			
@@ -458,7 +458,7 @@ public class Server
 		}
 		catch (IOException e)
 		{
-			System.out.println("Could not receive file.");
+			//System.out.println("Could not receive file.");
 			e.printStackTrace();
 		}
 		finally
@@ -485,7 +485,7 @@ public class Server
 			} 
 			catch (SocketException e)
 			{
-				System.out.println("UDP socket " + UDP_SOCKET_NUMBER +" could not be openend." );
+				//System.out.println("UDP socket " + UDP_SOCKET_NUMBER +" could not be openend." );
 				e.printStackTrace();
 			}
 		});
@@ -510,7 +510,7 @@ public class Server
 					Thread.sleep(10);
 				} catch (Exception e)
 				{
-					System.out.println("Receive broadcast thread sleep error");
+					//System.out.println("Receive broadcast thread sleep error");
 					e.printStackTrace();
 				}
 			}
@@ -565,7 +565,7 @@ public class Server
 				}
 				catch (IOException e)
 				{
-					System.out.println("UDP Packet reception failed");
+					//System.out.println("UDP Packet reception failed");
 					e.printStackTrace();
 				}
 			} 
@@ -591,13 +591,13 @@ public class Server
 			}
 			catch (IOException e)
 			{
-				System.out.println("Could not close server sockets");
+				//System.out.println("Could not close server sockets");
 				e.printStackTrace();
 			}
 		}
 		else
 		{
-			System.out.println("Could not close servers sockets: server's sockets are null");
+			//System.out.println("Could not close servers sockets: server's sockets are null");
 		}	
 	}
 	
@@ -612,7 +612,7 @@ public class Server
 		}
 		else
 		{
-			System.out.println("Could not close server UDP socket");
+			//System.out.println("Could not close server UDP socket");
 		}	
 	}
 	
@@ -662,8 +662,7 @@ public class Server
 			        }
  
 					lanAddress = inet_addr.getHostAddress();
-			        System.out.println("Server LAN address found: " 
-			        		+ lanAddress);
+			        //System.out.println("Server LAN address found: "	+ lanAddress);
 			        break mainloop;
 			    }
 			}

@@ -117,7 +117,7 @@ public class Client
 				clientSocket = new Socket(adress, SERVER_SOCKET_NUMBER);
 			} catch (IOException e)
 			{
-				System.out.println("Cannot open client socket");
+				//System.out.println("Cannot open client socket");
 				e.printStackTrace();
 			}
 		});
@@ -154,7 +154,7 @@ public class Client
 						Thread.sleep(10);
 					} catch (Exception e)
 					{
-						System.out.println("Send message thread sleep error");
+						//System.out.println("Send message thread sleep error");
 						e.printStackTrace();
 					}
 				}
@@ -166,7 +166,7 @@ public class Client
 							.add(username + ": " + message));
 				} catch (IOException e)
 				{
-					System.out.println("Message could not be sent");
+					//System.out.println("Message could not be sent");
 					e.printStackTrace();
 				}
 			});
@@ -185,13 +185,13 @@ public class Client
 				clientSocket.close();
 			} catch (IOException e)
 			{
-				System.out.println("Client socket could not be closed");
+				//System.out.println("Client socket could not be closed");
 				clientSocket = null;
 				e.printStackTrace();
 			}
 		} else
 		{
-			System.out.println("Could not close client socket");
+			//System.out.println("Could not close client socket");
 		}
 	}
 
@@ -217,7 +217,7 @@ public class Client
 							Thread.sleep(10);
 						} catch (Exception e)
 						{
-							System.out.println("Send file thread sleep error");
+							//System.out.println("Send file thread sleep error");
 							e.printStackTrace();
 						}
 					}
@@ -231,14 +231,14 @@ public class Client
 										"The file has been sent"));
 					} catch (IOException e)
 					{
-						System.out.println("File could not be sent");
+						//System.out.println("File could not be sent");
 						e.printStackTrace();
 					}
 				});
 			thread.start();
 		} else
 		{
-			System.out.println("File is too big. 10 Mo maximum.");
+			//System.out.println("File is too big. 10 Mo maximum.");
 		}
 	}
 
@@ -266,7 +266,7 @@ public class Client
 			msgInput += (char) byteBuffer[i];
 		}
 
-		System.out.println("Received Message from Server: " + msgInput);
+		//System.out.println("Received Message from Server: " + msgInput);
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class Client
 			msgInput += (char) byteBuffer[i];
 		}
 
-		System.out.println("Received Message from Server: " + msgInput);
+		//System.out.println("Received Message from Server: " + msgInput);
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class Client
 			msgInput += (char) byteBuffer[i];
 		}
 
-		System.out.println("Received Message from Server: " + msgInput);
+		//System.out.println("Received Message from Server: " + msgInput);
 		input.close();
 	}
 
@@ -345,7 +345,7 @@ public class Client
 				UDPsocket = new DatagramSocket();
 			} catch (SocketException e)
 			{
-				System.out.println("Client could not open UDP socket");
+				//System.out.println("Client could not open UDP socket");
 				e.printStackTrace();
 			}
 		});
@@ -454,8 +454,7 @@ public class Client
 									chatModel.getUserAvailableToChatMap().put(
 											username, remoteMachineIp);
 								}
-								System.out.println("Chat available with: "
-										+ username);
+								//System.out.println("Chat available with: " + username);
 							}
 						}
 
@@ -533,7 +532,7 @@ public class Client
 				// This name typically contains the DNS suffix. Again, at least
 				// on Oracle JDK
 				String name = address.getHostName().toLowerCase();
-				System.out.println(name);
+				//System.out.println(name);
 				if (name.startsWith(hostName))
 				{
 					String dnsSuffix = name.substring(hostName.length());
@@ -576,8 +575,7 @@ public class Client
 				}
 
 				broadcastAddress = addr.getBroadcast();
-				System.out.println("Broadcast address found: "
-						+ broadcastAddress.getHostAddress());
+				//System.out.println("Broadcast address found: "+ broadcastAddress.getHostAddress());
 				break mainloop;
 			}
 		}
@@ -608,7 +606,7 @@ public class Client
 						Thread.sleep(10);
 					} catch (Exception e)
 					{
-						System.out.println("Chat request thread sleep error");
+						//System.out.println("Chat request thread sleep error");
 						e.printStackTrace();
 					}
 				}
@@ -627,7 +625,7 @@ public class Client
 
 				} catch (IOException e)
 				{
-					System.out.println("Chat request could not be sent");
+					//System.out.println("Chat request could not be sent");
 					e.printStackTrace();
 				}
 			});
@@ -697,7 +695,7 @@ public class Client
 		} catch (final TimeoutException e)
 		{
 			// Took too long!
-			System.out.println("Remote user didn't answer to the chat request");
+			//System.out.println("Remote user didn't answer to the chat request");
 			Platform.runLater(() -> chatModel.getStatusMessagesList().add(
 					"No answer from remote user."));
 			closeClientSocket();

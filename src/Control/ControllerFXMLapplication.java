@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import Model.ChatModel;
 import Model.Client;
@@ -32,6 +34,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -282,18 +287,57 @@ public class ControllerFXMLapplication implements Initializable
 					}
 					else
 					{
+						buttonSauvegarderFichier.setOpacity(0.4);
 						buttonSauvegarderFichier.setDisable(true);
 						timeline.stop();
 					}
 				}
 			});
-
+			
+			setDnD();
 		} else
 		{
 			System.exit(0);
 		}
 	}
-
+	
+	/**
+	    * Méthode pour drag and drop un fichier à envoyer
+	    * 
+	    */
+	   public void setDnD(){
+	   
+	    textFieldFichier.setOnDragOver(new EventHandler<DragEvent>() {
+	           @Override
+	           public void handle(DragEvent event) {
+	               Dragboard db = event.getDragboard();
+	               if (db.hasFiles()) {
+	                   event.acceptTransferModes(TransferMode.COPY);
+	               } else {
+	                   event.consume();
+	               }
+	           }
+	       });
+	       
+	   textFieldFichier.setOnDragDropped(new EventHandler<DragEvent>() {
+	           @Override
+	           public void handle(DragEvent event) {
+	               Dragboard db = event.getDragboard();
+	               boolean success = false;
+	               if (db.hasFiles()) {
+	                   success = true;
+	                   String filePath = null;
+	                   for (File file:db.getFiles()) {
+	                       filePath = file.getAbsolutePath();
+	                       textFieldFichier.setText(filePath);
+	                   }
+	               }
+	               event.setDropCompleted(success);
+	               event.consume();
+	           }
+	       });
+	   }
+	
 	/**
 	 * Set a listener on the server's chatRequestedProperty to pop an alert when
 	 * it is changed to true
@@ -567,7 +611,7 @@ public class ControllerFXMLapplication implements Initializable
  		server.setFile(fileSavePath);
  		//passage vers le server
  		server.setFile(fileSavePath);
- 		System.out.println("main path : " +server.getFile().getPath());
+ 		//System.out.println("main path : " +server.getFile().getPath());
  		synchronized (server.getLockFile()) 
  		{
 				server.getLockFile().notify();
@@ -589,5 +633,4 @@ public class ControllerFXMLapplication implements Initializable
 	    	timeline.play();
 	    	
 	    }
-	 
 }

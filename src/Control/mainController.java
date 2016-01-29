@@ -8,13 +8,14 @@ import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 /**
- * Classe permettant de faire le liena avec la vue et de démarrer le programme
+ * Classe permettant de faire le liena avec la vue et de dï¿½marrer le programme
  * @author 0345162
  *
  */
@@ -22,7 +23,7 @@ public class mainController extends Application
 {
 
 	/**
-	 * Gestionnaire d'événements utilisé pour gérer la fermeture du stage
+	 * Gestionnaire d'ï¿½vï¿½nements utilisï¿½ pour gï¿½rer la fermeture du stage
 	 * principale
 	 */
 	EventHandler<WindowEvent> windowEventHandler;
@@ -34,7 +35,7 @@ public class mainController extends Application
 	}
 
 	/**
-	 * Démarre l'application
+	 * Dï¿½marre l'application
 	 */
 	public void start(Stage pStage) throws Exception
 	{
@@ -47,12 +48,15 @@ public class mainController extends Application
 		Scene scene = new Scene(root);
 		pStage.setScene(scene);
 		pStage.setTitle("Chat Application");
+		
+		pStage.getIcons().add(new Image("/View/51537.png"));
+		
 		pStage.show();
 		addSubControllerWindowEventHandler(pStage, subController);
 	}
 
 	/**
-	 * Ajoute un gestionnaire de fenêtre au stage principal pour gérer sa
+	 * Ajoute un gestionnaire de fenï¿½tre au stage principal pour gï¿½rer sa
 	 * fermeture
 	 * 
 	 * @param stage
